@@ -1,18 +1,24 @@
-## Arkana | Social Campaign Managment System
-Access the application: [https://arkana-portfolio.vercel.app](https://arkana-portfolio.vercel.app/)
+<div align="center">
+<h1>Arkana | Social Campaign Managment System</h1>
+<img height="240" alt="social-campaign-manager" src="https://github.com/user-attachments/assets/0afd9c5b-78a2-4789-b2d0-860bc5724729" />
+
+<p>Access the application: <a href="https://arkana-portfolio.vercel.app">https://arkana-portfolio.vercel.app</a></p>
+
+<p>Group: <a href="https://github.com/AnaliceCoimbra/">Analice Carneiro</a>, <a href="https://github.com/alicelobwp">Mariah Alice Pereira</a>, <a href="https://github.com/sofiahernandes">Sofia Hernandes</a>, <a href="https://github.com/viick04">Victória Azevedo</a> <br/>
+Advisors: <a href="https://br.linkedin.com/in/cristina-machado-corr%C3%AAa-leite-630309160">Cristina Leite</a>, <a href="https://www.linkedin.com/in/dolemes/">David Lemes</a>, <a href="https://br.linkedin.com/in/francisco-escobar">Francisco Escobar</a>, <a href="https://br.linkedin.com/in/katia-bossi">Katia Bossi</a>, <a href="https://br.linkedin.com/in/leonardo-fabris-lugoboni-a3369416">Leonardo Lugoboni</a></p>
 </div>
 
-Group: [Analice Carneiro](https://github.com/AnaliceCoimbra/), [Mariah Alice Pereira](https://github.com/alicelobwp), [Sofia Hernandes](https://github.com/sofiahernandes), [Victória Azevedo](https://github.com/viick04)  
-Advisors: [Cristina Leite](https://www.linkedin.com/), [David Lemes](https://www.linkedin.com/in/dolemes/), [Francisco Escobar](https://www.linkedin.com/), [Leonardo Lugoboni](https://www.linkedin.com/), [Katia Bossi](https://www.linkedin.com/)
-<br/><br/>
+<br/>
 
-### Description
+## Description
 
 Arkana is a TypeScript-first full-stack web application developed for the **Lideranças Empáticas Project**, an initiative by **FECAP University Center** that combines social impact with entrepreneurial education through food and fundraising campaigns.
 The platform streamlines the management of every donation campaign edition by providing tools for team administration, activity tracking, goal monitoring, contribution management, receipt validation, and performance analytics.
 Designed prioritizing scalability and maintainability, the application leverages **Next.js**, **Express**, **Prisma**, **MySQL**, **JWT authentication**, **Cloudinary**, and a RESTful architecture, with deployment configured for **Vercel** and **Railway**.
 
-### Folders structure
+<br/>
+
+## Folders structure
 
 ```yaml
 backend/              # Express + Prisma backend application
@@ -49,7 +55,9 @@ tailwind.config.js
 postcss.config.js
 ```
 
-### How to run it locally
+<br/>
+
+## How to run it locally
 
 0. Pre-requisites: [Node.js](https://nodejs.org/) and [Yarn](https://classic.yarnpkg.com/lang/en/) ou `npm`
 
@@ -76,8 +84,9 @@ npm run dev
 # or
 yarn run dev
 ```
-<br/><br/>
 
-### License
+<br/>
+
+## License
 
 <a href="https://www.fecap.br">FECAP - Fundação de Comércio Álvares Penteado</a> - <a href="https://github.com/sofiahernandes/social-campaign-manager">Arkana (Social Campain Manager)</a> © 2025 by <a href="https://github.com/analicecoimbra">Analice Coimbra Carneiro</a>, <a href="https://github.com/alicelobwp">Mariah Alice Pimentel Lôbo Pereira</a>, <a href="https://github.com/sofiahernandes">Sofia Botechia Hernandes</a> and <a href="https://github.com/viick04">Victória Duarte Vieira Azevedo</a> is licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" height="20" width="20" style="margin-left: 0.2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" height="20" width="20" style="margin-left: 0.2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg" height="20" width="20" style="margin-left: 0.2em;">
