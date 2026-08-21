@@ -1,48 +1,98 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* ==========================================================================
+   Arkana design tokens
+   Single source of truth. Nothing in app/ or components/ declares a raw color,
+   radius, shadow or easing value — it reads one of these.
+   ========================================================================== */
+
 :root {
-  --primary: #254128; /* forest green */
-  --secondary: #cd6184; /* pink accent */
-  --terciary: #fad8db;
-  --muted: #fffefb; /* beige neutral */
-  --background: #fffefb; /* blush base background */
-  --foreground: #242424; /* dark text for contrast */
+  /* --- Brand ------------------------------------------------------------- */
+  --primary: #254128; /* forest — the brand anchor */
+  --primary-hover: #325836; /* forest, one step lighter for hover on fills */
+  --primary-foreground: #fffefb;
 
-  /* Surfaces */
+  --secondary: #cd6184; /* rose — brand accent, large text, chart fills */
+  --secondary-hover: #a74662;
+  --secondary-foreground: #ffffff;
+  /* AA-safe rose. Use for button fills and for any text below 18px:
+     #cd6184 only reaches 3.7:1 on white, which fails body-size contrast. */
+  --secondary-strong: #b85070;
+
+  --terciary: #fad8db; /* blush — soft fills, badges, empty states */
+  --terciary-foreground: #5c2334;
+
+  /* --- Surfaces ---------------------------------------------------------- */
+  --background: #fffefb; /* warm cream — public, auth and marketing surfaces */
+  --surface: #f5f3ee; /* app ground — the authenticated task surfaces */
   --card: #ffffff;
+  --card-foreground: #242424;
   --popover: #ffffff;
+  --popover-foreground: #242424;
 
-  /* Text & subtle elements */
-  --muted-foreground: #4b4b4b;
-  --accent: var(--secondary);
+  /* --- Text -------------------------------------------------------------- */
+  --foreground: #242424;
+  --muted: #f0ede6; /* warm muted fill: table headers, inert chips */
+  --muted-foreground: #57534c; /* 7.4:1 on --muted, 8.6:1 on --card */
 
-  /* Feedback colors */
-  --destructive: #c53030; /* slightly softened red for harmony */
+  --accent: #f6ecee; /* hover wash derived from rose, not a gray */
+  --accent-foreground: #5c2334;
 
-  /* Charts / data visuals – derived from main palette */
+  /* --- Lines & focus ----------------------------------------------------- */
+  --border: #e6e2da; /* dividers, card edges */
+  --input: #c9c4ba; /* form-control edges — needs to be seen */
+  --ring: #254128; /* focus is always the brand, never a browser blue */
+
+  /* --- Feedback ---------------------------------------------------------- */
+  --destructive: #c53030;
+  --destructive-hover: #a52525;
+  --destructive-foreground: #ffffff;
+  --success: #1f6b4a;
+  --success-foreground: #ffffff;
+  --warning: #a5641a;
+  --warning-foreground: #ffffff;
+
+  /* --- Data visuals ------------------------------------------------------ */
   --chart-1: var(--primary);
-  --chart-2: #195b41; /* lighter green for layering */
+  --chart-2: #4a7c50;
   --chart-3: var(--secondary);
-  --chart-4: var(--muted);
-  --chart-5: #a7b96e; /* soft complementary olive tone */
+  --chart-4: #a7b96e;
+  --chart-5: #d9a3ae;
 
-  /* Common tokens */
-  --radius: 1rem;
-  --button-hover: #195b41;
-}
+  /* --- Radius ------------------------------------------------------------ */
+  /* Rounded, but on a scale — a 16px radius on a 32px input reads as a lozenge. */
+  --radius: 0.75rem;
 
-@font-face {
-  font-family: "MinhaFonte";
-  src:
-    url("/fonts/MinhaFonte.woff2") format("woff2"),
-    url("/fonts/MinhaFonte.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
+  /* --- Elevation --------------------------------------------------------- */
+  /* Tinted with the forest, not black: a neutral shadow turns cream grey. */
+  --shadow-color: 37 41 32;
+  --shadow-xs: 0 1px 2px 0 rgb(var(--shadow-color) / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(var(--shadow-color) / 0.07),
+    0 1px 2px -1px rgb(var(--shadow-color) / 0.07);
+  --shadow-md: 0 4px 10px -2px rgb(var(--shadow-color) / 0.09),
+    0 2px 4px -2px rgb(var(--shadow-color) / 0.06);
+  --shadow-lg: 0 12px 24px -6px rgb(var(--shadow-color) / 0.12),
+    0 4px 8px -4px rgb(var(--shadow-color) / 0.07);
+  --shadow-xl: 0 24px 48px -12px rgb(var(--shadow-color) / 0.16),
+    0 8px 16px -8px rgb(var(--shadow-color) / 0.08);
+
+  /* --- Motion ------------------------------------------------------------ */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --duration-slow: 280ms;
+
+  /* --- Layout ------------------------------------------------------------ */
+  --content-max: 80rem; /* 1280px — the one page measure */
+  --nav-width: 15rem; /* desktop side nav */
+  --bottom-nav-height: 4.25rem; /* mobile bottom nav, excl. safe area */
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
   --color-foreground: var(--foreground);
 
   --color-card: var(--card);
@@ -52,10 +102,16 @@
   --color-popover-foreground: var(--popover-foreground);
 
   --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
   --color-primary-foreground: var(--primary-foreground);
 
   --color-secondary: var(--secondary);
+  --color-secondary-hover: var(--secondary-hover);
+  --color-secondary-strong: var(--secondary-strong);
   --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-terciary: var(--terciary);
+  --color-terciary-foreground: var(--terciary-foreground);
 
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
@@ -64,7 +120,12 @@
   --color-accent-foreground: var(--accent-foreground);
 
   --color-destructive: var(--destructive);
+  --color-destructive-hover: var(--destructive-hover);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
 
   --color-border: var(--border);
   --color-input: var(--input);
@@ -76,27 +137,102 @@
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
 
-  --rounded-sm: calc(var(--radius) - 4px);
-  --rounded-md: calc(var(--radius) - 2px);
-  --rounded-lg: var(--radius);
-  --rounded-xl: calc(var(--radius) + 4px);
+  /* Tailwind v4 reads --radius-*, not --rounded-*. */
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 12px);
 
-  --button-hover: #354f52;
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-display: var(--font-changa-one), var(--font-geist-sans), sans-serif;
+
+  --ease-out: var(--ease-out);
+  --ease-in-out: var(--ease-in-out);
+
+  --spacing-nav: var(--nav-width);
+  --spacing-bottom-nav: var(--bottom-nav-height);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
+  /* The body is not a centering device. Pages own their own composition —
+     centering here forced every page to fight it with w-screen/min-h-dvh. */
   body {
-    @apply min-h-screen bg-background text-foreground flex items-center justify-center;
+    @apply min-h-dvh bg-background text-foreground antialiased;
+  }
+
+  /* The shadcn primitives carry their own `focus-visible:ring-ring` treatment,
+     which works now that --ring is actually defined. This covers the elements
+     that don't: links, and any bare interactive element. */
+  a:focus-visible,
+  [tabindex]:not([data-slot]):focus-visible {
+    @apply rounded-sm outline-2 outline-offset-2 outline-ring;
+  }
+
+  ::selection {
+    background: var(--terciary);
+    color: var(--terciary-foreground);
+  }
+
+  /* Firefox / WebKit number inputs: no spinners anywhere in the product. */
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* File inputs appear in both donation forms; style them once. */
+  input[type="file"]::file-selector-button {
+    background: var(--primary);
+    color: var(--primary-foreground);
+    border: none;
+    padding: 0.5rem 0.875rem;
+    border-radius: var(--radius-md);
+    margin-right: 0.75rem;
+    cursor: pointer;
+    transition: background var(--duration-base) var(--ease-out);
+  }
+
+  input[type="file"]:hover::file-selector-button {
+    background: var(--primary-hover);
   }
 }
 
-.animate-selected-pop {
-  animation: selected-pop 180ms ease-out both;
+@layer utilities {
+  /* Changa One is the brand voice. It belongs on the hero, not on task UI. */
+  .font-display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+  }
 }
 
+/* Touch feedback for the bottom nav pills. */
 .pill {
   position: relative;
   overflow: hidden;
@@ -115,8 +251,8 @@
   transform: scale(0);
   opacity: 0;
   transition:
-    transform 280ms ease-out,
-    opacity 400ms ease-out;
+    transform var(--duration-slow) var(--ease-out),
+    opacity 400ms var(--ease-out);
   z-index: -1;
 }
 
@@ -125,38 +261,25 @@
   opacity: 0.12;
 }
 
-.no-scrollbar::-webkit-scrollbar {
-  width: 0 !important;
-  height: 0 !important;
-  display: none !important;
-  background: transparent;
+.animate-selected-pop {
+  animation: selected-pop var(--duration-base) var(--ease-out) both;
 }
 
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+/* Scroll cue. Tailwind's built-in elastic keyframe reads dated; a smooth float
+   on --ease-in-out carries the same "there is more below" signal. */
+.animate-nudge {
+  animation: nudge-down 2.4s var(--ease-in-out) infinite;
 }
 
-input[type="number"] {
-  -moz-appearance: textfield; /* Firefox */
-}
-
-@media (max-width: 900px) {
-  .menu-desktop {
-    display: none !important;
+@keyframes nudge-down {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.7;
   }
-  .menu-mobile {
-    display: block !important;
-  }
-}
-
-@media (min-width: 901px) {
-  .menu-desktop {
-    display: block !important;
-  }
-  .menu-mobile {
-    display: none !important;
+  50% {
+    transform: translateY(30%);
+    opacity: 1;
   }
 }
 
@@ -172,5 +295,13 @@ input[type="number"] {
   }
 }
 
-@import "../styles/new-contribution.css";
-@import "../styles/fonts.css";
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
