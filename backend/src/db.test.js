@@ -1,6 +1,8 @@
+// Small smoke test for the database layer so connectivity issues fail fast during development.
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
+// Performs a minimal write/read cycle to confirm the Prisma connection is working in the current environment.
 async function tryConnection() {
   try {
     const Admin = await prisma.mentor.create({

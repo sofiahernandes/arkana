@@ -1,7 +1,9 @@
+// Authentication controller. Handles registration, login, password changes, and logout responses.
 import { prisma } from "../../prisma/lib/prisma.js";
 import bcrypt from "bcrypt";
 import { createToken, denyToken } from "../services/tokenServices.js";
 
+// Removes fields that the frontend does not need to manage directly before sending the user payload back in auth responses.
 const sanitizeUser = (u) => ({
   RaUsuario: u.RaUsuario,
   SenhaUsuario: u.SenhaUsuario,
@@ -12,6 +14,7 @@ const sanitizeUser = (u) => ({
 });
 const authController = {
   // POST /api/register
+  // Registers a new participant after validating the payload and hashing the password for storage.
   createUser: async (req, res) => {
     const {
       RaUsuario,
@@ -75,6 +78,7 @@ const authController = {
   },
 
   // POST /api/register/login
+  // Validates the participant credentials and returns the signed session token used by protected routes.
   loginUser: async (req, res) => {
     const { RaUsuario, SenhaUsuario } = req.body;
 
@@ -112,6 +116,7 @@ const authController = {
   },
 
   // PUT /api/resetPassword
+  // Replaces the stored password hash with a new one during password reset flows.
   resetPassword: async (req, res) => {
     const { rausuario, newPassword } = req.body;
     if (!rausuario || !newPassword) {
@@ -133,6 +138,7 @@ const authController = {
   },
 
   // POST /api/logOutUser
+  // Invalidates the current token by adding its identifier to the in-memory denylist.
   logOutUser: async (req, res) => {
     try {
       const { jti } = req.usuario;

@@ -1,7 +1,9 @@
+// Mentor and administrator controller. Concentrates account creation, login, and lookup flows for staff users.
 import bcrypt from "bcrypt";
 import { prisma } from "../../prisma/lib/prisma.js";
 import { createToken, denyToken } from "../services/tokenServices.js";
 
+// Trims the mentor payload down to the fields currently returned by the authentication and profile endpoints.
 const sanitizeMentor = (u) => ({
   IdMentor: u.IdMentor,
   EmailMentor: u.EmailMentor,
@@ -10,6 +12,7 @@ const sanitizeMentor = (u) => ({
 });
 const mentorController = {
   // GET /api/mentors
+  // Lists every mentor/admin record for administrative inspection screens.
   allMentors: async (_, res) => {
     const { IdMentor, EmailMentor, IsAdmin, SenhaMentor } = req.params;
     try {
@@ -30,6 +33,7 @@ const mentorController = {
   },
 
   // GET /api/mentor/id/:IdMentor
+  // Returns one mentor/admin account by id for profile and contact lookups.
   mentorById: async (req, res) => {
     const { IdMentor } = req.params;
     try {
@@ -47,6 +51,7 @@ const mentorController = {
     }
   },
 
+  // Expands a mentor into the team they supervise so the mentor dashboard can scope itself to one group.
   mentorByTeam: async (req, res) => {
     const { IdMentor } = req.params;
 
@@ -88,6 +93,7 @@ const mentorController = {
   },
 
   // POST /api/createMentor/:RaUsuario
+  // Creates a mentor account from a team email and immediately links that mentor to the participant's team.
   createMentor: async (req, res) => {
     const { EmailMentor, RaUsuario } = req.body;
 
@@ -140,6 +146,7 @@ const mentorController = {
   },
 
   // LOGIN /api/register/login
+  // Validates mentor credentials and returns the session token used by the mentor-only views.
   loginMentor: async (req, res) => {
     const { EmailMentor, SenhaMentor } = req.body;
     if (!EmailMentor || !SenhaMentor) {
@@ -178,6 +185,7 @@ const mentorController = {
   },
 
   // POST /api/createAdmin
+  // Creates an administrator account with a hashed password, reusing the mentor table with the admin flag enabled.
   createAdmin: async (req, res) => {
     const { EmailMentor, SenhaMentor } = req.body;
 
@@ -203,6 +211,7 @@ const mentorController = {
   },
 
   // LOGIN /api/register/login
+  // Validates an administrator login and returns the signed token for the admin dashboard.
   loginAdmin: async (req, res) => {
     const { EmailMentor, SenhaMentor } = req.body;
 
@@ -233,6 +242,7 @@ const mentorController = {
   },
 
   // DELETE /api/deleteMentor/:EmailMentor
+  // Deletes a mentor/admin account by email for maintenance flows.
   deleteMentor: async (req, res) => {
     const { EmailMentor } = req.params;
 

@@ -1,3 +1,4 @@
+// Express application bootstrap. Registers middleware, static file serving, API routes, and shared error handling.
 import express from "express";
 import cors from "cors";
 import "dotenv/config";

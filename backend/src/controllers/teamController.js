@@ -1,7 +1,9 @@
+// Team controller. Exposes CRUD-style endpoints for team registration and team membership lookups.
 import { prisma } from "../../prisma/lib/prisma.js";
 
 const teamsController = {
   // GET /api/teams
+  // Lists every registered team ordered by name for administrative and report views.
   allTeams: async (_, res) => {
     try {
       const times = await prisma.time.findMany({
@@ -18,6 +20,7 @@ const teamsController = {
   },
 
   // GET /api/team/:IdTime
+  // Returns one team by primary key for detail screens and maintenance flows.
   teamByID: async (req, res) => {
     const { IdTime } = req.params;
     try {
@@ -34,6 +37,7 @@ const teamsController = {
   },
 
   // GET /api/team/:RaUsuario
+  // Resolves the team membership row for one participant and reshapes it into the frontend team model.
   teamByUserRA: async (req, res) => {
     const { RaUsuario } = req.params;
 
@@ -77,6 +81,7 @@ const teamsController = {
   },
 
   // POST /api/createTeam
+  // Creates the team header and its membership row from the onboarding form payload.
   createTeam: async (req, res) => {
     const {
       IdMentor,
@@ -139,6 +144,7 @@ const teamsController = {
   },
 
   // DELETE /api/deleteTeam/:IdTime
+  // Deletes a team by id and reports whether the team was missing or the operation failed unexpectedly.
   deleteTeam: async (req, res) => {
     const { IdTime } = req.params;
     try {

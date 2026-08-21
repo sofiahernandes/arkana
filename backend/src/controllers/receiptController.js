@@ -1,9 +1,11 @@
+// Receipt controller. Attaches uploaded files to contributions and exposes receipt lookup endpoints.
 import { cloudinary } from "../configs/uploadconfig.js";
 import { prisma } from "../../prisma/lib/prisma.js";
 import { deleteImageFromUrl } from "../configs/cloudinaryHelper.js";
 
 const receiptController = {
   // POST /api/comprovante/:IdContribuicaoFinanciera
+  // Attaches or replaces the receipt for a financial contribution and removes the previous Cloudinary asset when needed.
   addReceiptAtContribution: async (req, res) => {
     try {
       const { IdContribuicaoFinanceira } = req.params;
@@ -78,6 +80,7 @@ const receiptController = {
       });
     }
   },
+  // Mirrors the same receipt replacement flow for food contributions.
   addFoodReceipt: async (req, res) => {
     try {
       const { IdContribuicaoAlimenticia } = req.params;
@@ -154,6 +157,7 @@ const receiptController = {
   },
 
   // GET /api/comprovante/usuario/:raUsuario
+  // Returns every receipt associated with the participant's financial contributions, newest first.
   receiptByRA: async (req, res) => {
     try {
       const { RaUsuario } = req.params;
@@ -186,6 +190,7 @@ const receiptController = {
   },
 
   // GET /api/comprovante/:IdComprovante
+  // Resolves one receipt together with the linked contribution and user metadata for detailed inspection.
   receiptById: async (req, res) => {
     try {
       const { IdComprovante } = req.params;
@@ -224,6 +229,7 @@ const receiptController = {
     }
   },
 
+  // Lists every stored receipt for administrative views.
   getAllReceipts: async (_, res) => {
     try {
       const comprovantes = await prisma.comprovante.findMany({
@@ -250,6 +256,7 @@ const receiptController = {
   },
 
   // DELETE /api/comprovante/:IdComprovante
+  // Removes the receipt record and its Cloudinary asset so orphaned files do not accumulate.
   deleteReceiptById: async (req, res) => {
     try {
       const { IdComprovante } = req.params;

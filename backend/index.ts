@@ -1,3 +1,4 @@
+// Entry point used by the deployment/runtime layer to expose the backend application.
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";

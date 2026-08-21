@@ -1,3 +1,4 @@
+// Database connection setup shared by the backend routes that still query MySQL directly.
 import mysql from "mysql2/promise";
 import "dotenv/config";
 

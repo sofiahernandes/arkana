@@ -1,3 +1,4 @@
+// Central API route table. Keeps endpoint wiring in one place so controllers stay focused on request handling.
 import { Router } from "express";
 import { pool } from "./db.js";
 import upload from "./configs/uploadconfig.js";

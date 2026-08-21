@@ -1,3 +1,4 @@
+// Cloudinary utility helpers used to clean up previously uploaded receipt files.
 export const getPublicIdFromUrl = (url) => {
   if (!url) return null;
 
