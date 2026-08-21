@@ -1,3 +1,4 @@
+// Mobile navigation menu for restricted participant pages.
 "use client";
 
 import Link from "next/link";
@@ -29,14 +30,17 @@ export default function MenuMobile() {
   const createHref = baseHref + "/new-contribution";
   const historyHref = baseHref + "/team-history";
 
+  // Marks the current tab by comparing the route prefix against the destination for each menu item.
   const isActive = (href: string) => pathname?.startsWith(href);
 
+  // Extracts the current participant id from the route so the menu links always point to the active user area.
   useEffect(() => {
     if (params?.RaUsuario) {
       setRaUsuario(Number(params.RaUsuario));
     }
   }, [params]);
 
+  // Forces a refresh when the user taps the active creation tab again instead of navigating to the same URL.
   const onCreateClick: React.MouseEventHandler<HTMLAnchorElement> = (e) => {
     if (isActive(createHref)) {
       e.preventDefault();
@@ -49,6 +53,7 @@ export default function MenuMobile() {
   const neutralPill = "bg-transparent hover:bg-primary/20";
   const activePill = "bg-[#3B5D3D] text-white border border-[#3B5D3D]";
 
+  // Memoizes the icon variants once because the menu only switches between a small fixed set of images.
   const icons = useMemo(
     () => ({
       home: { default: homeDefault, active: homeActive, pressed: homePressed },
@@ -65,6 +70,7 @@ export default function MenuMobile() {
   const [pressed, setPressed] = useState<{ [key: string]: boolean }>({});
   const timersRef = useRef<{ [key: string]: number }>({});
 
+  // Applies a short pressed state so the mobile navigation has immediate visual feedback on tap.
   const triggerPress = (key: string) => {
     if (timersRef.current[key]) window.clearTimeout(timersRef.current[key]);
     setPressed((p) => ({ ...p, [key]: true }));
@@ -73,12 +79,14 @@ export default function MenuMobile() {
     }, 150);
   };
 
+  // Clears the tap animation timers on unmount to avoid updating state after the menu is gone.
   useEffect(() => {
     return () => {
       Object.values(timersRef.current).forEach((t) => window.clearTimeout(t));
     };
   }, []);
 
+  // Chooses the icon variant based on the tab state so active and pressed feedback stay centralized.
   const getIconSrc = (
     set: { default: any; active: any; pressed?: any },
     isTabActive: boolean,

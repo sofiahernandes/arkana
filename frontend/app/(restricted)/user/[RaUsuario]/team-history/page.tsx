@@ -1,3 +1,4 @@
+// Restricted team history page. Aggregates contribution history from the user team perspective.
 "use client";
 
 import React, { SetStateAction, useEffect, useState } from "react";
@@ -21,7 +22,9 @@ export default function TeamHistory() {
   const [selectedContribution, setSelectedContribution] = useState<any>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
+  // Loads the shared team/profile context once so both the heading and the history views use the same source of truth.
   useEffect(() => {
+    // Fetches the participant and team metadata that frame the contribution history page.
     const fetchTeamData = async () => {
       const data = await fetchData(RaUsuario);
       setUser(data?.user);

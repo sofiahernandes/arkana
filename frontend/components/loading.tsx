@@ -1,3 +1,4 @@
+// Loading state component displayed while asynchronous page data is still being resolved.
 import React from "react";
 
 interface Properties {

@@ -1,3 +1,4 @@
+// Reusable input wrapper that standardizes field rendering for the custom forms.
 interface Properties {
   placeholder: string;
   type: string;

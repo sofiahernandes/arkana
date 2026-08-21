@@ -1,3 +1,4 @@
+// Donation helper functions and sample structures used by the contribution views.
 import { Heart, DollarSignIcon } from "lucide-react";
 
 export const donations = [

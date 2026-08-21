@@ -1,3 +1,4 @@
+// Responsive hook used to branch UI behavior for smaller screens.
 import * as React from "react";
 
 const MOBILE_BREAKPOINT = 768;

@@ -1,3 +1,4 @@
+// Administrator login form used for staff authentication.
 import React from "react";
 
 type Props = {

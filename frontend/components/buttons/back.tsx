@@ -1,3 +1,4 @@
+// Shared back button used to keep return navigation consistent across restricted pages.
 import Link from "next/link";
 
 export default function BackHome() {

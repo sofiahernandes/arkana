@@ -1,3 +1,4 @@
+// Registration page for new mentor users. Wraps the sign-up form in the public onboarding shell.
 "use client";
 
 import React, { useState } from "react";

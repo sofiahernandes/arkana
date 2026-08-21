@@ -1,3 +1,4 @@
+// Restricted administrator history page. Presents the broader contribution history used by admins.
 "use client";
 
 import React, { SetStateAction } from "react";
@@ -7,15 +8,6 @@ import MenuDesktopAdmin from "@/components/administrator/menu";
 import MenuMobileAdmin from "@/components/administrator/menu-mobile";
 import RenderContributionTableAdmin from "@/components/administrator/contributions-table";
 import RenderContributionCardAdmin from "@/components/administrator/contributions-grid";
-
-{
-  /** 
- * 
- corrigir modal admin - tirar Gastos, aumentar fonte da data 
- adicionar filtro de pesquisar por ediçao
- adicionar filtro de edições
-  */
-}
 
 export default function AdminPageVision() {
   const [isOpen, setIsOpen] = React.useState(false);

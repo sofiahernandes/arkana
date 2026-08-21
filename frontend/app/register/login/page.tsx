@@ -1,3 +1,4 @@
+// Login page for mentor users. Composes the authentication form with the registration flow layout.
 "use client";
 
 import React from "react";

@@ -1,3 +1,4 @@
+// Administrator contribution container that coordinates filters, totals, and the table view.
 "use client";
 
 import React, { useState } from "react";

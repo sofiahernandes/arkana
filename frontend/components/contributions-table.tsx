@@ -1,3 +1,4 @@
+// Participant-facing contribution table that renders normalized donation records.
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
@@ -53,6 +54,7 @@ export default function RenderContributionTable({
         ? raFromParams
         : undefined;
 
+  // Keeps the table actions stable while still letting the parent inject the record viewer callback.
   const columns = useMemo(
     () =>
       makeContributionColumns({
@@ -61,10 +63,12 @@ export default function RenderContributionTable({
     [onSelect],
   );
 
+  // Loads and normalizes the current user's contributions whenever the route or explicit refresh key changes.
   useEffect(() => {
     const controller = new AbortController();
     let active = true;
     const backend_url = process.env.NEXT_PUBLIC_BACKEND_URL;
+    // Converts the mixed financial/food API payload into the table rows expected by the participant history screen.
     async function fetchContributions() {
       try {
         setLoading(true);
@@ -132,6 +136,7 @@ export default function RenderContributionTable({
                 | { IdComprovante: number; Imagem: string }
                 | undefined;
 
+              // Builds a single receipt URL shape regardless of whether the backend returned a filename or a full URL.
               if (rawImg && String(rawImg).trim() !== "") {
                 const s = String(rawImg).trim();
                 const isAbsolute = /^https?:\/\//i.test(s);

@@ -1,3 +1,4 @@
+// Toast hook that exposes the app notification API to custom components.
 "use client";
 
 import * as React from "react";

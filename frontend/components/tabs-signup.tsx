@@ -1,3 +1,4 @@
+// Tab wrapper used to organize the sign-up experience inside the registration screens.
 "use client";
 
 import React from "react";
@@ -18,6 +19,7 @@ export default function SigninTabs({ setIsLogged, setRaUsuario }: Props) {
   const [senhaAlunoMentor, setSenhaAlunoMentor] = React.useState("");
   const [mostrarSenha, setMostrarSenha] = React.useState(false);
 
+  // Registers the participant and, on success, advances the onboarding flow to the team creation step.
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 

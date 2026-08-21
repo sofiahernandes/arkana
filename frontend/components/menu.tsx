@@ -1,3 +1,4 @@
+// Desktop navigation menu for restricted participant pages.
 import { SetStateAction, useState, useEffect } from "react";
 import Link from "next/link";
 import React from "react";

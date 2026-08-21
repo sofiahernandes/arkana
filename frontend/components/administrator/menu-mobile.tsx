@@ -1,3 +1,4 @@
+// Mobile navigation menu for administrator pages.
 "use client";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
@@ -11,8 +12,10 @@ export default function MenuMobileAdmin() {
   const historyHref = `admin/${IdMentor}/admin-history`;
   const profileHref = `admin/${IdMentor}/admin-profile`;
 
+  // Highlights the active admin tab by comparing the current route prefix with each destination.
   const isActive = (href: string) => pathname?.startsWith(href);
 
+  // Extracts the admin id from the route to assemble mobile navigation links dynamically.
   useEffect(() => {
     if (params?.IdMentor) {
       setIdMentor(params.IdMentor as string);

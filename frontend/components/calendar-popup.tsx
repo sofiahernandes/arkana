@@ -1,3 +1,4 @@
+// Calendar popup used to filter or pick dates in contribution-related flows.
 import { Calendar } from "@/components/ui/calendar";
 import { ChevronDownIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";

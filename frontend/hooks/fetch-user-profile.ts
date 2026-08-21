@@ -1,3 +1,4 @@
+// Data-fetching hook dedicated to loading the logged-in user profile payload.
 interface Team {
   NomeTime: string;
   RaUsuario: number;

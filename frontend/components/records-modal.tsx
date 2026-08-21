@@ -1,3 +1,4 @@
+// Modal used to inspect contribution records in more detail without leaving the current page.
 import placeholderComprovante from "@/assets/placeholderComprovante.jpg";
 import Modal from "../hooks/use-modal";
 import DeleteContribution from "@/components/delete-contribution-popup";

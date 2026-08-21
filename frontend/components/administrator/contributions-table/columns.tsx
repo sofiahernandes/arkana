@@ -1,3 +1,4 @@
+// Column definitions for the administrator contribution table.
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";

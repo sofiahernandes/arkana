@@ -1,3 +1,4 @@
+// Bar chart configuration used in reports where labeled comparisons matter more than raw tables.
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -65,11 +66,13 @@ export function TeamsRankingChart() {
   const [error, setError] = useState<string | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
 
+  // Loads contributions once and groups them by team owner so the ranking chart can count donation volume per group.
   useEffect(() => {
     const controller = new AbortController();
     const backend_url = process.env.NEXT_PUBLIC_BACKEND_URL;
     let active = true;
 
+    // Rebuilds a team-centric structure from the contribution feed because the ranking is based on grouped counts.
     async function fetchTeamContrib() {
       try {
         setLoading(true);
@@ -139,6 +142,7 @@ export function TeamsRankingChart() {
     };
   }, []);
 
+  // Reduces the grouped team data into the top-five ranking consumed directly by the vertical bar chart.
   const chartData = teams
     .map((team) => {
       const totalContribuicoes = team.contribuicoes?.length || 0;

@@ -1,3 +1,4 @@
+// Financial donation form block. Manages numeric inputs and receipt file selection before submission.
 "use client";
 
 import React, { useRef, useState, useEffect } from "react";
@@ -51,15 +52,18 @@ export default function DonationsForm({
   const [gastosInput, setGastosInput] = useState<string>("");
   const [quantidadeInput, setQuantidadeInput] = useState<string>("");
 
+  // Normalizes decimal input before converting it to a number so form fields accept the local comma format.
   const normalize = (s: string) => s.replace(",", ".").trim();
   const toNumberOrNaN = (s: string) => Number(normalize(s));
 
+  // Mirrors the external numeric state back into the visible input strings after parent resets or prefills.
   useEffect(() => {
     setMetaInput(meta ? String(meta) : "");
     setGastosInput(gastos ? String(gastos) : "");
     setQuantidadeInput(quantidade ? String(quantidade) : "");
   }, [meta, gastos, quantidade]);
 
+  // Injects the small upload animation once and also clears any pending timer when the component unmounts.
   useEffect(() => {
     const style = document.createElement("style");
     style.innerHTML = `
@@ -82,6 +86,7 @@ export default function DonationsForm({
     };
   }, []);
 
+  // Stops the temporary upload animation and clears the timer used to return the button to the idle state.
   const stopGif = () => {
     setPicking(false);
     if (timerRef.current) {
@@ -90,6 +95,7 @@ export default function DonationsForm({
     }
   };
 
+  // Opens the hidden file input while briefly switching the button to the animated upload state.
   const handlePickClick = () => {
     if (loading) return;
     setPicking(true);
@@ -98,7 +104,7 @@ export default function DonationsForm({
     fileInputRef.current?.click();
   };
 
-  // Limpa timer ao desmontar
+  // Adds a second unmount cleanup for the upload timer so stale callbacks do not run after navigation.
   useEffect(() => {
     return () => {
       if (timerRef.current) {
@@ -108,6 +114,7 @@ export default function DonationsForm({
     };
   }, []);
 
+  // Validates the selected receipt file locally before the submit handler tries to upload it.
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.currentTarget.files?.[0] ?? null;
 
@@ -140,18 +147,21 @@ export default function DonationsForm({
     stopGif();
   };
 
+  // Keeps the text input responsive while also updating the parsed numeric value used by the submit payload.
   const handleQuantidadeChange = (value: string) => {
     setQuantidadeInput(value);
     const num = parseFloat(value.replace(",", "."));
     setQuantidade(isNaN(num) ? 0 : num);
   };
 
+  // Applies the same string-to-number conversion for the target amount field.
   const handleMetaChange = (value: string) => {
     setMetaInput(value);
     const num = parseFloat(value.replace(",", "."));
     setMeta(isNaN(num) ? 0 : num);
   };
 
+  // Applies the same string-to-number conversion for the expense field.
   const handleGastosChange = (value: string) => {
     setGastosInput(value);
     const num = parseFloat(value.replace(",", "."));

@@ -1,3 +1,4 @@
+// Shared area chart wrapper used by report screens to visualize donation evolution over time.
 "use client";
 
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";

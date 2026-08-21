@@ -1,3 +1,4 @@
+// Restricted user profile page. Loads the participant context and their current campaign metrics.
 "use client";
 
 import React, { SetStateAction, useEffect } from "react";
@@ -27,7 +28,9 @@ export default function UserProfile() {
 
   const backend_url = process.env.NEXT_PUBLIC_BACKEND_URL;
 
+  // Loads the user profile and their contributions together so the screen can render the team context and current campaign history.
   useEffect(() => {
+    // Fetches the participant profile payload that also contains the assigned team information.
     const fetchTeamData = async () => {
       const data = await fetchData(RaUsuario);
       setUser(data?.user);
@@ -35,6 +38,7 @@ export default function UserProfile() {
     };
     fetchTeamData();
 
+    // Fetches the normalized contribution list shown in the profile metrics and history blocks.
     const fetchContributions = async () => {
       try {
         if (isMockMode()) {
@@ -53,7 +57,9 @@ export default function UserProfile() {
     fetchContributions();
   }, [RaUsuario]);
 
+  // Resolves the mentor email only after the team data reveals which mentor is linked to the current group.
   useEffect(() => {
+    // Keeps the mentor contact field in sync with either mock data or the backend mentor lookup endpoint.
     const fetchEmailMentor = async () => {
       if (!team?.IdMentor) return;
       try {
@@ -72,6 +78,7 @@ export default function UserProfile() {
     fetchEmailMentor();
   }, [team?.IdMentor]);
 
+  // Creates or links a mentor for the current team and then updates local state so the page reflects the new assignment immediately.
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!emailMentor?.trim()) {

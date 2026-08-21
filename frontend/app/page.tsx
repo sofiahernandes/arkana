@@ -1,3 +1,4 @@
+// Public dashboard page. Loads contribution data and renders the public ranking and summary cards.
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -24,11 +25,13 @@ export default function PublicDashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Loads the public contribution feed once and normalizes both mock and API payloads into the ranking format used by the page.
   useEffect(() => {
     const controller = new AbortController();
     const backend_url = process.env.NEXT_PUBLIC_BACKEND_URL;
     let active = true;
 
+    // Splits the unified contribution list into the top financial and food rankings shown on the dashboard cards.
     async function fetchContributions() {
       try {
         setLoading(true);
@@ -87,6 +90,7 @@ export default function PublicDashboard() {
                 | { IdComprovante: number; Imagem: string }
                 | undefined;
 
+              // Converts either a stored path or an absolute URL into the receipt URL consumed by the frontend.
               if (rawImg && String(rawImg).trim() !== "") {
                 const s = String(rawImg).trim();
                 const isAbsolute = /^https?:\/\//i.test(s);

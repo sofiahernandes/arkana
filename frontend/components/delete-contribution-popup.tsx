@@ -1,3 +1,4 @@
+// Confirmation dialog for destructive contribution removal actions.
 "use client";
 
 import React from "react";
@@ -30,6 +31,7 @@ export default function DeleteContribution({
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
+  // Executes the delete request only after confirmation and reports any backend failure inside the dialog itself.
   async function handleConfirm(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
 

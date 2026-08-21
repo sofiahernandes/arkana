@@ -1,3 +1,4 @@
+// Static metric definitions used to render the public dashboard summary cards.
 import { Users, Calendar, UserCheck, DollarSign } from "lucide-react";
 
 export const overallMetrics = [

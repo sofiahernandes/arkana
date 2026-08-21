@@ -1,3 +1,4 @@
+// Reusable table wrapper for the administrator contribution grid behavior.
 "use client";
 
 import {

@@ -1,3 +1,4 @@
+// Tab wrapper used by the login screen to keep authentication variants in one place.
 "use client";
 
 import React from "react";
@@ -21,6 +22,7 @@ export default function TabsLogin() {
   const [SenhaUsuario, setSenhaUsuario] = React.useState("123@Arkana");
 
   // Login Student
+  // Logs in a participant and routes them straight to the contribution creation area for their own profile.
   const handleSubmitAluno = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -53,6 +55,7 @@ export default function TabsLogin() {
   };
 
   // Login Mentor
+  // Logs in a mentor and redirects to the mentor-only history view for the team they supervise.
   const handleSubmitMentor = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -85,7 +88,8 @@ export default function TabsLogin() {
     }
   };
 
-  //login admin
+  // Login Admin
+  // Logs in an administrator and routes to the global contribution history dashboard.
   const handleSubmitAdmin = async (e: React.FormEvent) => {
     e.preventDefault();
 

@@ -1,3 +1,4 @@
+// Generic table wrapper that binds the participant contribution columns to the table behavior.
 "use client";
 
 import {

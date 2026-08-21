@@ -1,3 +1,4 @@
+// Landing hero section shown on the public entry pages to frame the campaign purpose.
 import Image from "next/image";
 import React from "react";
 

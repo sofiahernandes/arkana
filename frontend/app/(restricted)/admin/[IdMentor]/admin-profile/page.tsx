@@ -1,3 +1,4 @@
+// Restricted administrator profile page. Centralizes admin-level account and dashboard information.
 "use client";
 
 import React, { SetStateAction, useEffect } from "react";
@@ -18,7 +19,9 @@ export default function AdminProfile() {
 
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
+  // Loads the currently logged administrator email so the profile card reflects the active account.
   useEffect(() => {
+    // Fetches the admin record through the mentor endpoint because administrators share that backend model.
     const fetchAdminData = async () => {
       try {
         if (isMockMode()) {
@@ -39,6 +42,7 @@ export default function AdminProfile() {
     }
   }, [adminId]);
 
+  // Creates a second administrator account from this screen without leaving the current admin session.
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newEmailMentor?.trim()) {

@@ -1,3 +1,4 @@
+// Modal state hook that centralizes open/close behavior for reusable overlay components.
 "use client";
 
 import React, {

@@ -1,3 +1,4 @@
+// Food donation list/presentation component used in contribution history views.
 "use client";
 
 import Image, { StaticImageData } from "next/image";
@@ -79,6 +80,7 @@ export default function FoodDonations({
     Outros: 0,
   };
 
+  // Sanitizes the incoming numeric props on mount so the derived food totals start from valid integer values.
   useEffect(() => {
     if (!Number.isInteger(idAlimento)) setIdAlimento(0);
     if (!Number.isInteger(quantidade ?? 0)) setQuantidade(0);
@@ -86,6 +88,7 @@ export default function FoodDonations({
     if (!Number.isFinite(gastos)) setGastos(0);
   }, []);
 
+  // Notifies the parent form whenever the selected food item or its quantities change.
   useEffect(() => {
     if (onAlimentoChange) {
       onAlimentoChange({
@@ -96,6 +99,7 @@ export default function FoodDonations({
     }
   }, [idAlimento, quantidade, pesoUnidade]);
 
+  // Derives the total kilograms and points locally to avoid duplicating that math in the page component.
   const totais = useMemo(() => {
     const nome = ALIMENTOS.find((a) => a.id === (idAlimento ?? 0))?.nome ?? "";
     const q = Math.floor(quantidade ?? 0);
@@ -105,6 +109,7 @@ export default function FoodDonations({
     return { kgTotal, pontos };
   }, [idAlimento, quantidade, pesoUnidade]);
 
+  // Pushes the recalculated totals back to the parent so the page can show aggregate metrics in real time.
   useEffect(() => {
     onTotaisChange?.({
       pontos: totais.pontos,
@@ -113,6 +118,7 @@ export default function FoodDonations({
     });
   }, [totais, gastos]);
 
+  // Resets the upload animation state and cancels any pending timeout after file selection finishes.
   const stopGif = () => {
     setPicking(false);
     if (timerRef.current) {
@@ -121,12 +127,14 @@ export default function FoodDonations({
     }
   };
 
+  // Opens the hidden file input used to attach the food donation receipt.
   const handlePickClick = () => {
     if (loading) return;
     if (timerRef.current) clearTimeout(timerRef.current);
     fileInputRef.current?.click();
   };
 
+  // Rejects unsupported receipt files before they reach the backend upload endpoint.
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.currentTarget.files?.[0] ?? null;
     if (!file) {

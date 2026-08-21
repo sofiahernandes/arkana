@@ -1,3 +1,4 @@
+// Administrator grid view for scanning contribution totals and statuses at a glance.
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -38,11 +39,13 @@ export default function RenderContributionCardAdmin({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Loads the global contribution list used by the administrator card dashboard and the public report grid.
   useEffect(() => {
     const controller = new AbortController();
     const backend_url = process.env.NEXT_PUBLIC_BACKEND_URL;
     let active = true;
 
+    // Normalizes mixed contribution payloads so the admin card view can stay independent from backend table names.
     async function fetchContributions() {
       try {
         setLoading(true);
@@ -109,6 +112,7 @@ export default function RenderContributionCardAdmin({
                 | { IdComprovante: number; Imagem: string }
                 | undefined;
 
+              // Builds the receipt object from either a stored upload path or a full external URL.
               if (rawImg && String(rawImg).trim() !== "") {
                 const s = String(rawImg).trim();
                 const isAbsolute = /^https?:\/\//i.test(s);

@@ -1,3 +1,4 @@
+// Tab switcher for team-related views so the page can alternate between grouped datasets.
 "use client";
 
 import React from "react";
@@ -21,6 +22,7 @@ export default function TeamTabs({ raUsuario }: Props) {
   const [RaAluno9, setRaAluno9] = React.useState("");
   const [RaAluno10, setRaAluno10] = React.useState("");
 
+  // Creates the team from the onboarding form and redirects the new leader to the first contribution screen.
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 

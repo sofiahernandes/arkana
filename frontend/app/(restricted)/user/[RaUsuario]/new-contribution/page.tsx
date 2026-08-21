@@ -1,3 +1,4 @@
+// Restricted contribution creation page. Coordinates form state, API submission, and receipt upload flow.
 "use client";
 
 import { SetStateAction, useEffect, useState } from "react";
@@ -43,6 +44,7 @@ export default function Donations() {
 
   const [totaisPontos, setTotaisPontos] = useState(0);
 
+  // Reads the user route once and hydrates the initial participant/team context, including mock mode support.
   useEffect(() => {
     if (params?.RaUsuario) {
       const ra = Number(params.RaUsuario);
@@ -57,6 +59,7 @@ export default function Donations() {
   const backend_url = process.env.NEXT_PUBLIC_BACKEND_URL;
   const apiUrl = `${backend_url}/api/createContribution`;
 
+  // Sends a financial contribution first, then uploads the receipt only if the contribution was created successfully.
   const handleFinancialSubmit = async () => {
     if (loading || !RaUsuario) return;
 
@@ -150,6 +153,7 @@ export default function Donations() {
     }
   };
 
+  // Reuses the same contribution endpoint for food donations and follows with the optional receipt upload step.
   const handleFoodSubmit = async () => {
     if (loading || !RaUsuario) return;
 

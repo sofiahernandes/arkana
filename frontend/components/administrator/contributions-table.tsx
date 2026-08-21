@@ -1,3 +1,4 @@
+// Administrator-facing contribution table with broader visibility than the participant version.
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
@@ -41,6 +42,7 @@ export default function RenderContributionTableAdmin({
   const [loading, setLoading] = useState(false);
   const [_, setError] = useState<string | null>(null);
 
+  // Keeps the admin row actions stable while still allowing the parent modal opener to be injected.
   const columns = useMemo(
     () =>
       makeContributionColumns({
@@ -49,11 +51,13 @@ export default function RenderContributionTableAdmin({
     [onSelect],
   );
 
+  // Fetches and normalizes every contribution whenever the admin view needs a fresh dataset.
   useEffect(() => {
     const controller = new AbortController();
     let active = true;
     const backend_url = process.env.NEXT_PUBLIC_BACKEND_URL;
 
+    // Converts the backend payload into the broader admin table model, including calculated food totals.
     async function fetchContributions() {
       try {
         setLoading(true);
@@ -119,6 +123,7 @@ export default function RenderContributionTableAdmin({
                 | { IdComprovante: number; Imagem: string }
                 | undefined;
 
+              // Standardizes receipt URLs so the table can preview uploads regardless of the storage format returned.
               if (rawImg && String(rawImg).trim() !== "") {
                 const s = String(rawImg).trim();
                 const isAbsolute = /^https?:\/\//i.test(s);

@@ -1,3 +1,4 @@
+// Column definitions for the participant contribution table so sorting and rendering stay declarative.
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";

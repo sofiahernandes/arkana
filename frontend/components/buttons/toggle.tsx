@@ -1,3 +1,4 @@
+// Small toggle button wrapper used in custom flows that need a consistent interaction style.
 import { SetStateAction } from "react";
 import { Grip, Rows3 } from "lucide-react";
 

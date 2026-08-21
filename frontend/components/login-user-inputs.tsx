@@ -1,3 +1,4 @@
+// Login form fields for participant access. Keeps validation and input wiring grouped together.
 import React from "react";
 
 type Props = {

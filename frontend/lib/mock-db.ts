@@ -1,3 +1,4 @@
+// Mock data helpers used when the frontend runs without the real backend or seeded database.
 export type MockUser = {
   RaUsuario: number;
   NomeUsuario: string;

@@ -1,3 +1,4 @@
+// Desktop navigation menu for administrator pages.
 import { SetStateAction, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -15,6 +16,7 @@ export default function MenuDesktopAdmin({
   const params = useParams();
   const [IdMentor, setIdMentor] = useState<string | null>(null);
 
+  // Reads the current admin id from the route so every menu link points back to the active administrator area.
   useEffect(() => {
     if (params?.IdMentor) {
       setIdMentor(params.IdMentor as string);

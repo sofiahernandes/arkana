@@ -1,3 +1,4 @@
+// Class selection dropdown used by registration and filtering flows.
 "use client";
 
 import * as React from "react";

@@ -1,3 +1,4 @@
+// Restricted mentor history page. Shows the mentor-specific contribution history and summary views.
 "use client";
 
 import React, { SetStateAction, useEffect, useState } from "react";
@@ -29,6 +30,7 @@ export default function MentorVision() {
   const [loadingUser, setLoadingUser] = useState(false);
   const [errorUser, setErrorUser] = useState<string | null>(null);
 
+  // Resolves the mentor's team from the route param so the page can scope all later contribution queries correctly.
   useEffect(() => {
     if (!IdMentor) {
       console.warn("invalido", params);
@@ -38,6 +40,7 @@ export default function MentorVision() {
     const controller = new AbortController();
     let active = true;
 
+    // Fetches the single team supervised by the mentor and stores only the shape this screen needs.
     async function fetchMentorTeam() {
       try {
         setLoadingTeam(true);
@@ -84,6 +87,7 @@ export default function MentorVision() {
     };
   }, [IdMentor]);
 
+  // Loads the participant profile only after the team lookup reveals which student leads that group.
   useEffect(() => {
     const ra = team?.RaUsuario;
     if (!backend_url) return;
@@ -95,6 +99,7 @@ export default function MentorVision() {
     const controller = new AbortController();
     let active = true;
 
+    // Fetches the user details used to render the class information above the contribution history.
     async function fetchUser() {
       try {
         setLoadingUser(true);

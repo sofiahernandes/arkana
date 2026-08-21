@@ -1,3 +1,4 @@
+// Public reports page that focuses on the read-only donation dashboards and charts.
 "use client";
 
 import React, { useState } from "react";
@@ -10,7 +11,7 @@ import { BiggestContributionsChart } from "@/components/reports-charts/tooltip-c
 import { FinanContribuitionsChart } from "@/components/reports-charts/area-chart/page";
 import { TeamsRankingChart } from "@/components/reports-charts/bar-label-costum/page";
 
-// Generate editions automatically
+// Derives the semester edition labels from the base edition/year so the report selector stays current without manual updates.
 function generateEditions(startEdition = 7, startYear = 2025) {
   const editions = [];
   const currentDate = new Date();
@@ -34,7 +35,7 @@ function generateEditions(startEdition = 7, startYear = 2025) {
 
 export default function PublicReports() {
   const [edition, setEdition] = useState<number>(() => {
-    // Auto-select the current edition
+    // Starts the reports view on the edition that matches the current semester.
     const now = new Date();
     const startEdition = 7;
     const startYear = 2025;
@@ -50,6 +51,7 @@ export default function PublicReports() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Prepares the available edition labels for the report filters and future navigation work.
   const editions = generateEditions();
 
   return (

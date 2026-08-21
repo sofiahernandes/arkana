@@ -1,3 +1,4 @@
+// Team-related helper data used to keep team labels and grouping logic out of the UI components.
 export const teams = [
   { name: "Team Alpha", activities: 5, amount: "VVV" },
   { name: "Team Beta", activities: 4, amount: "VVV" },

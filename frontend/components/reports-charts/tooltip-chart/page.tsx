@@ -1,3 +1,4 @@
+// Tooltip chart configuration used to present richer point details in the reporting UI.
 "use client";
 
 import { useEffect, useState } from "react";
@@ -37,11 +38,13 @@ export function BiggestContributionsChart() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Loads the full contribution feed once and normalizes it into the chart input model used by the report cards.
   useEffect(() => {
     const controller = new AbortController();
     const backend_url = process.env.NEXT_PUBLIC_BACKEND_URL;
     let active = true;
 
+    // Converts the backend payload into the unified contribution format before any chart aggregation happens.
     async function fetchContributions() {
       try {
         setLoading(true);
@@ -82,6 +85,7 @@ export function BiggestContributionsChart() {
                 | { IdComprovante: number; Imagem: string }
                 | undefined;
 
+              // Resolves receipt paths into displayable URLs so chart tooltips can still access receipt metadata consistently.
               if (rawImg && String(rawImg).trim() !== "") {
                 const s = String(rawImg).trim();
                 const isAbsolute = /^https?:\/\//i.test(s);
@@ -152,6 +156,7 @@ export function BiggestContributionsChart() {
     };
   }, []);
 
+  // Aggregates contributions by date and separates financial value from food weight for the comparative report.
   const chartData =
     contributions.length > 0
       ? Object.values(

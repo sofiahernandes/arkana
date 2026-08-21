@@ -1,3 +1,4 @@
+// Root layout for the Next.js app. Applies global styles and shared providers once for every page.
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";

@@ -1,3 +1,4 @@
+// Administrator modal/view for inspecting mentor-related contribution records.
 import placeholderComprovante from "@/assets/placeholderComprovante.jpg";
 import Modal from "../../hooks/use-modal";
 import formatBRL from "../../hooks/use-format-currency";

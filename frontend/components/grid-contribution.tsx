@@ -1,3 +1,4 @@
+// Grid-style contribution summary component used where card-based comparison is clearer than a table.
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -51,10 +52,12 @@ export default function RenderContributionCard({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Loads the current user's contributions and reshapes them for the card-based history view.
   useEffect(() => {
     const controller = new AbortController();
     let active = true;
 
+    // Reuses the same normalization rules as the table view so both participant history layouts stay aligned.
     async function fetchContributions() {
       try {
         setLoading(true);
@@ -126,6 +129,7 @@ export default function RenderContributionCard({
                 | { IdComprovante: number; Imagem: string }
                 | undefined;
 
+              // Converts receipt filenames and absolute URLs into one frontend-ready receipt object.
               if (rawImg && String(rawImg).trim() !== "") {
                 const s = String(rawImg).trim();
                 const isAbsolute = /^https?:\/\//i.test(s);

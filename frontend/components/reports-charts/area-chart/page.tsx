@@ -1,3 +1,4 @@
+// Area chart showcase/configuration used by the reporting pages.
 "use client";
 
 import { useEffect, useState } from "react";
@@ -36,10 +37,12 @@ export function FinanContribuitionsChart() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Loads the contribution feed once and filters it down to the financial history required by this chart.
   useEffect(() => {
     const controller = new AbortController();
     const backend_url = process.env.NEXT_PUBLIC_BACKEND_URL;
 
+    // Normalizes the raw contribution payload into the lightweight shape needed for monthly aggregation.
     async function fetchContributions() {
       try {
         setLoading(true);
@@ -90,6 +93,7 @@ export function FinanContribuitionsChart() {
     return () => controller.abort();
   }, []);
 
+  // Groups financial contributions by month so the chart can show the revenue progression over the semester.
   const chartData =
     contributions.length > 0
       ? Object.values(

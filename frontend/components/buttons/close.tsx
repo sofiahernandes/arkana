@@ -1,3 +1,4 @@
+// Shared close button used by modals and dismissible panels.
 import { X } from "lucide-react";
 import React from "react";
 
