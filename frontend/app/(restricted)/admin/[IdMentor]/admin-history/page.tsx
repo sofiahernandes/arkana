@@ -2,82 +2,73 @@
 "use client";
 
 import React, { SetStateAction } from "react";
-import RecordsMentor from "@/components/administrator/records-mentor";
+import { useParams } from "next/navigation";
+
 import SwitchViewButton from "@/components/buttons/toggle";
-import MenuDesktopAdmin from "@/components/administrator/menu";
-import MenuMobileAdmin from "@/components/administrator/menu-mobile";
-import RenderContributionTableAdmin from "@/components/administrator/contributions-table";
-import RenderContributionCardAdmin from "@/components/administrator/contributions-grid";
+import ContributionsGrid from "@/components/contributions/contributions-grid";
+import ContributionsTable from "@/components/contributions/contributions-table";
+import RecordsModal from "@/components/contributions/records-modal";
+import PageHeader from "@/components/layout/page-header";
+import PageShell from "@/components/layout/page-shell";
+
+const EMPTY_TITLE = "Nenhuma contribuição por enquanto!";
+const EMPTY_DESCRIPTION =
+  "Nessa edição, nenhum grupo arrecadou doações. Quando os alunos líderes adicionarem ao Arkana, aparecerá aqui!";
 
 export default function AdminPageVision() {
+  const params = useParams();
+  const IdMentor = String(params.IdMentor ?? "");
+
   const [isOpen, setIsOpen] = React.useState(false);
   const [buttonSelected, setButtonSelected] = React.useState(false);
-  const [menuOpen, setMenuOpen] = React.useState(false);
   const [selectedContribution, setSelectedContribution] =
     React.useState<any>(null);
 
+  const openRecord = (contribution: any) => {
+    setSelectedContribution(contribution);
+    setIsOpen(true);
+  };
+
   return (
-    <div className="min-h-dvh w-full overflow-y-hidden overflow-x-hidden flex flex-col bg-[#f4f3f1]/60">
-      <div className="flex flex-col left-0 top-0">
-        <header className="py-4 mt-6 relative flex justify-center items-center max-w-100 mx-auto">
-          <button
-            type="button"
-            className={`open-menu hover:text-primary/60 ${
-              menuOpen ? "menu-icon hidden" : "menu-icon"
-            }`}
-            onClick={() => setMenuOpen(true)}
-          >
-            {" "}
-            ☰{" "}
-          </button>
-        </header>
-      </div>
+    <PageShell nav={{ role: "admin", id: IdMentor }}>
+      <PageHeader
+        title="Histórico de contribuições"
+        description="Todas as arrecadações registradas por todos os grupos nesta edição da campanha."
+        actions={
+          <SwitchViewButton
+            buttonSelected={buttonSelected}
+            setButtonSelected={(arg: SetStateAction<boolean>) =>
+              setButtonSelected(arg)
+            }
+          />
+        }
+      />
 
-      <div className="w-full flex justify-center pt-4 transition-all duration-300 ease-in-out">
-        <MenuDesktopAdmin menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
+      {selectedContribution && (
+        <RecordsModal
+          data={selectedContribution}
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+        />
+      )}
 
-        <MenuMobileAdmin />
-
-        <main className="w-full max-w-[1300px] p-4 md:mt-0">
-          {selectedContribution && (
-            <RecordsMentor
-              data={selectedContribution}
-              isOpen={isOpen}
-              setIsOpen={setIsOpen}
-            />
-          )}
-          <div className="flex flex-col gap-2 text-center">
-            <h3 className="text-2xl uppercase font-semibold text-primary ">
-              Histórico de contribuições de todos os grupos
-            </h3>
-            <div className="self-end">
-              <SwitchViewButton
-                buttonSelected={buttonSelected}
-                setButtonSelected={(arg: SetStateAction<boolean>) =>
-                  setButtonSelected(arg)
-                }
-              />
-            </div>
-          </div>
-          <div className="mt-2">
-            {buttonSelected ? (
-              <RenderContributionTableAdmin
-                onSelect={(contribution: any) => {
-                  setSelectedContribution(contribution);
-                  setIsOpen(true);
-                }}
-              />
-            ) : (
-              <RenderContributionCardAdmin
-                onSelect={(contribution: any) => {
-                  setSelectedContribution(contribution);
-                  setIsOpen(true);
-                }}
-              />
-            )}
-          </div>
-        </main>
-      </div>
-    </div>
+      {buttonSelected ? (
+        <ContributionsTable
+          scope="all"
+          showTeamColumn
+          emptyTitle={EMPTY_TITLE}
+          emptyDescription={EMPTY_DESCRIPTION}
+          onSelect={openRecord}
+        />
+      ) : (
+        <ContributionsGrid
+          scope="all"
+          variant="report"
+          emptyTitle={EMPTY_TITLE}
+          emptyDescription={EMPTY_DESCRIPTION}
+          onSelect={openRecord}
+        />
+      )}
+    </PageShell>
   );
 }

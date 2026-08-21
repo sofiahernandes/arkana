@@ -2,13 +2,27 @@
 "use client";
 
 import React, { SetStateAction, useEffect, useState } from "react";
-import BackHome from "@/components/buttons/back";
 import { useParams } from "next/navigation";
-import RecordsMentor from "@/components/administrator/records-mentor";
-import RenderContributionCard from "@/components/grid-contribution";
+
+import BackHome from "@/components/buttons/back";
 import SwitchViewButton from "@/components/buttons/toggle";
-import RenderContributionTable from "@/components/contributions-table";
+import ContributionsGrid from "@/components/contributions/contributions-grid";
+import ContributionsTable from "@/components/contributions/contributions-table";
+import RecordsModal from "@/components/contributions/records-modal";
+import PageHeader from "@/components/layout/page-header";
+import PageShell from "@/components/layout/page-shell";
+import { ErrorPanel, LoadingPanel } from "@/components/layout/state-panel";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { getMockUser, getMockMentorTeam, isMockMode } from "@/lib/mock-db";
+
+const EMPTY_TITLE = "Nenhuma contribuição por enquanto!";
+const EMPTY_DESCRIPTION =
+  "Seu grupo ainda não arrecadou nenhuma doação. Quando o aluno líder adicionar ao Arkana, ela aparecerá aqui!";
 
 interface TeamData {
   IdTime: number;
@@ -139,66 +153,90 @@ export default function MentorVision() {
       ? team.RaUsuario
       : undefined;
 
+  const openRecord = (contribution: any) => {
+    setSelectedContribution(contribution);
+    setIsOpen(true);
+  };
+
   return (
-    <div className="min-h-dvh w-full overflow-y-hidden overflow-x-hidden flex flex-col bg-[#f4f3f1]/60">
-      <div className="flex flex-col left-0 top-0">
-        <div className="absolute left-0 top-0">
-          <BackHome />
-        </div>
+    <PageShell>
+      <div className="mb-4">
+        <BackHome />
       </div>
 
-      <div className="w-full flex justify-center transition-all duration-300 ease-in-out">
-        <main className="w-full self-center max-w-[1300px] p-4 md:mt-0">
-          {selectedContribution && (
-            <RecordsMentor
-              data={selectedContribution}
-              isOpen={isOpen}
-              setIsOpen={setIsOpen}
+      <PageHeader
+        title={
+          loadingTeam
+            ? "Carregando time…"
+            : team?.NomeTime || "Nenhum time encontrado"
+        }
+        description={
+          loadingUser
+            ? "Carregando turma…"
+            : `Turma ${user?.TurmaUsuario || "—"}. Contribuições do grupo que você acompanha.`
+        }
+        actions={
+          raUsuario !== undefined ? (
+            <SwitchViewButton
+              buttonSelected={buttonSelected}
+              setButtonSelected={(arg: SetStateAction<boolean>) =>
+                setButtonSelected(arg)
+              }
             />
-          )}
-          <div className="flex flex-col gap-2 text-center">
-            <h3 className="text-2xl uppercase font-semibold text-primary">
-              {loadingTeam
-                ? "Carregando time…"
-                : team?.NomeTime || "Nenhum time encontrado"}
-            </h3>
+          ) : undefined
+        }
+      />
 
-            <h4 className="mb-3 text-xl text-primary text-center">
-              {loadingUser
-                ? "Carregando turma…"
-                : `Turma ${user?.TurmaUsuario || "—"}`}
-            </h4>
+      {selectedContribution && (
+        <RecordsModal
+          data={selectedContribution}
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+        />
+      )}
 
-            <div className="self-end">
-              <SwitchViewButton
-                buttonSelected={buttonSelected}
-                setButtonSelected={(arg: SetStateAction<boolean>) =>
-                  setButtonSelected(arg)
-                }
-              />
-            </div>
-          </div>
-          <div className="mt-2">
-            {buttonSelected ? (
-              <RenderContributionTable
-                raUsuario={team?.RaUsuario ?? undefined}
-                onSelect={(contribution: any) => {
-                  setSelectedContribution(contribution);
-                  setIsOpen(true);
-                }}
-              />
-            ) : (
-              <RenderContributionCard
-                raUsuario={team?.RaUsuario ?? undefined}
-                onSelect={(contribution: any) => {
-                  setSelectedContribution(contribution);
-                  setIsOpen(true);
-                }}
-              />
-            )}
-          </div>
-        </main>
-      </div>
-    </div>
+      {(errorTeam || errorUser) && (
+        <ErrorPanel
+          title="Não foi possível carregar o time"
+          description={errorTeam ?? errorUser ?? undefined}
+        />
+      )}
+
+      {!errorTeam && loadingTeam && (
+        <LoadingPanel label="Carregando contribuições do time…" rows={3} />
+      )}
+
+      {/* Wait for the RA before querying. Previously this rendered immediately
+          and requested /api/contributions/undefined. */}
+      {!errorTeam && !loadingTeam && raUsuario === undefined && (
+        <Empty className="border border-dashed border-border">
+          <EmptyHeader>
+            <EmptyTitle>Nenhum time vinculado</EmptyTitle>
+            <EmptyDescription>
+              Você ainda não acompanha um grupo nesta edição. Assim que um time
+              informar seu email, o histórico aparecerá aqui.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      )}
+
+      {raUsuario !== undefined &&
+        (buttonSelected ? (
+          <ContributionsTable
+            scope={String(raUsuario)}
+            emptyTitle={EMPTY_TITLE}
+            emptyDescription={EMPTY_DESCRIPTION}
+            onSelect={openRecord}
+          />
+        ) : (
+          <ContributionsGrid
+            scope={String(raUsuario)}
+            variant="team"
+            emptyTitle={EMPTY_TITLE}
+            emptyDescription={EMPTY_DESCRIPTION}
+            onSelect={openRecord}
+          />
+        ))}
+    </PageShell>
   );
 }
