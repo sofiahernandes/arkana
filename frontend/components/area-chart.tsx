@@ -35,7 +35,7 @@ interface ChartProps {
 
 export function Chart({ chartData }: ChartProps) {
   return (
-    <Card className="rounded-md border border-gray-400 shadow-none">
+    <Card className="rounded-md border border-border shadow-none">
       <CardHeader>
         <CardTitle>Histórico de Arrecadações</CardTitle>
         <CardDescription>

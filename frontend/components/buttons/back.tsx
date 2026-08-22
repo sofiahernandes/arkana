@@ -1,16 +1,16 @@
-// Shared back button used to keep return navigation consistent across restricted pages.
+// Shared back button used to keep return navigation consistent across pages.
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 
 export default function BackHome() {
   return (
-    <Link href="/" className="underline text-black fixed p-4">
-      <img
-        width="30"
-        height="30"
-        className="text-primary opacity-60 hover:opacity-70"
-        src="https://img.icons8.com/glyph-neue/64/circled-left-2.png"
-        alt="circled-left-2"
-      />
-    </Link>
+    <Button asChild variant="ghost" size="sm" className="gap-1.5">
+      <Link href="/">
+        <ArrowLeft aria-hidden />
+        Voltar ao painel
+      </Link>
+    </Button>
   );
 }
