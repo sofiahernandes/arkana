@@ -3,18 +3,22 @@
 
 import React, { SetStateAction, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import MenuMobile from "@/components/menu-mobile";
-import MenuDesktop from "@/components/menu";
-import RenderContributionCard from "@/components/grid-contribution";
-import { fetchData } from "@/hooks/fetch-user-profile";
-import RecordsModal from "@/components/records-modal";
+
 import SwitchViewButton from "@/components/buttons/toggle";
-import RenderContributionTable from "@/components/contributions-table";
+import ContributionsGrid from "@/components/contributions/contributions-grid";
+import ContributionsTable from "@/components/contributions/contributions-table";
+import RecordsModal from "@/components/contributions/records-modal";
+import PageHeader from "@/components/layout/page-header";
+import PageShell from "@/components/layout/page-shell";
+import { fetchData } from "@/hooks/fetch-user-profile";
+
+const EMPTY_TITLE = "Nenhuma contribuição por enquanto!";
+const EMPTY_DESCRIPTION =
+  "Seu grupo ainda não arrecadou nenhuma doação. Quando o aluno líder adicionar ao Arkana, ela aparecerá aqui!";
 
 export default function TeamHistory() {
   const params = useParams();
   const RaUsuario = Number(params.RaUsuario);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [team, setTeam] = useState<any>(null);
   const [user, setUser] = useState<any>(null);
   const [isOpen, setIsOpen] = React.useState(false);
@@ -33,81 +37,58 @@ export default function TeamHistory() {
     fetchTeamData();
   }, [RaUsuario]);
 
+  const openRecord = (contribution: any) => {
+    setSelectedContribution(contribution);
+    setIsOpen(true);
+  };
+
   return (
-    <div className="min-h-dvh w-full overflow-y-hidden overflow-x-hidden flex flex-col bg-[#f4f3f1]/60">
-      <div className="flex flex-col left-0 top-0">
-        <header className="py-4 mt-6 relative flex justify-center items-center max-w-100 mx-auto">
-          <button
-            type="button"
-            className={`open-menu hover:text-primary/60 ${
-              menuOpen ? "menu-icon hidden" : "menu-icon"
-            }`}
-            onClick={() => setMenuOpen(true)}
-          >
-            {" "}
-            ☰{" "}
-          </button>
-        </header>
-      </div>
+    <PageShell nav={{ role: "user", id: String(RaUsuario) }}>
+      <PageHeader
+        title={team?.NomeTime ? `Histórico — ${team.NomeTime}` : "Histórico do time"}
+        description={`Turma ${user?.TurmaUsuario ?? "—"}. Todas as contribuições registradas pelo seu grupo nesta edição.`}
+        actions={
+          <SwitchViewButton
+            buttonSelected={buttonSelected}
+            setButtonSelected={(arg: SetStateAction<boolean>) =>
+              setButtonSelected(arg)
+            }
+          />
+        }
+      />
 
-      <div className="w-full flex justify-center pt-4 transition-all duration-300 ease-in-out">
-        <MenuDesktop
-          menuOpen={menuOpen}
-          setMenuOpen={(arg: SetStateAction<boolean>) => setMenuOpen(arg)}
+      {selectedContribution && (
+        <RecordsModal
+          data={selectedContribution}
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          canDelete
+          onDelete={() => {
+            setIsOpen(false);
+            setSelectedContribution(null);
+            setRefreshKey((k) => k + 1);
+          }}
         />
+      )}
 
-        <MenuMobile />
-
-        <main className="w-full max-w-[1300px] p-4 md:mt-0">
-          {selectedContribution && (
-            <RecordsModal
-              data={selectedContribution}
-              isOpen={isOpen}
-              setIsOpen={setIsOpen}
-              onDeleted={() => {
-                setIsOpen(false);
-                setSelectedContribution(null);
-                setRefreshKey((k) => k + 1);
-              }}
-            />
-          )}
-          <div className="flex flex-col gap-2 text-center">
-            <h3 className="text-2xl uppercase font-semibold text-primary ">
-              Histórico do time {team?.NomeTime && team?.NomeTime}
-            </h3>
-            <h4 className="text-xl text-primary/80">
-              Turma {user?.TurmaUsuario ? user?.TurmaUsuario : "X"}
-            </h4>
-            <div className="self-end">
-              <SwitchViewButton
-                buttonSelected={buttonSelected}
-                setButtonSelected={(arg: SetStateAction<boolean>) =>
-                  setButtonSelected(arg)
-                }
-              />
-            </div>
-          </div>
-          <div className="mt-2">
-            {buttonSelected ? (
-              <RenderContributionTable
-                refreshKey={refreshKey}
-                onSelect={(contribution: any) => {
-                  setSelectedContribution(contribution);
-                  setIsOpen(true);
-                }}
-              />
-            ) : (
-              <RenderContributionCard
-                refreshKey={refreshKey}
-                onSelect={(contribution: any) => {
-                  setSelectedContribution(contribution);
-                  setIsOpen(true);
-                }}
-              />
-            )}
-          </div>
-        </main>
-      </div>
-    </div>
+      {buttonSelected ? (
+        <ContributionsTable
+          scope={String(RaUsuario)}
+          emptyTitle={EMPTY_TITLE}
+          emptyDescription={EMPTY_DESCRIPTION}
+          refreshKey={refreshKey}
+          onSelect={openRecord}
+        />
+      ) : (
+        <ContributionsGrid
+          scope={String(RaUsuario)}
+          variant="team"
+          emptyTitle={EMPTY_TITLE}
+          emptyDescription={EMPTY_DESCRIPTION}
+          refreshKey={refreshKey}
+          onSelect={openRecord}
+        />
+      )}
+    </PageShell>
   );
 }

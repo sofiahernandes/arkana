@@ -1,21 +1,28 @@
 // Restricted administrator profile page. Centralizes admin-level account and dashboard information.
 "use client";
 
-import React, { SetStateAction, useEffect } from "react";
-import MenuMobileAdmin from "@/components/administrator/menu-mobile";
-import MenuDesktopAdmin from "@/components/administrator/menu";
+import React, { useEffect } from "react";
+import Image from "next/image";
 import { useParams } from "next/navigation";
+import { toast } from "sonner";
+
 import Arkana from "@/assets/Arkana.png";
+import Field from "@/components/forms/field";
+import PageHeader from "@/components/layout/page-header";
+import PageShell from "@/components/layout/page-shell";
+import { InfoList, InfoRow } from "@/components/layout/info-list";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getMockMentor, isMockMode } from "@/lib/mock-db";
 
 export default function AdminProfile() {
   const params = useParams();
   const adminId = parseInt(params.IdMentor as string, 10);
 
-  const [menuOpen, setMenuOpen] = React.useState(false);
   const [adminLogado, setAdminLogado] = React.useState<string>();
-  const [newEmailMentor, setNewEmailMentor] = React.useState<string>();
-  const [senhaMentor, setSenhaMentor] = React.useState<string>();
+  const [newEmailMentor, setNewEmailMentor] = React.useState("");
+  const [senhaMentor, setSenhaMentor] = React.useState("");
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -45,14 +52,20 @@ export default function AdminProfile() {
   // Creates a second administrator account from this screen without leaving the current admin session.
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newEmailMentor?.trim()) {
-      alert("Por favor, insira um email válido.");
+
+    if (!newEmailMentor.trim()) {
+      toast.error("Informe o email do novo administrador.");
+      return;
+    }
+    if (senhaMentor.length < 8) {
+      toast.error("A senha precisa ter ao menos 8 caracteres.");
       return;
     }
 
+    setIsSubmitting(true);
     try {
       if (isMockMode()) {
-        alert("Administrador cadastrado no ambiente de demonstração.");
+        toast.success("Administrador cadastrado no ambiente de demonstração.");
         return;
       }
       const response = await fetch(`${BACKEND_URL}/api/createAdmin`, {
@@ -70,105 +83,97 @@ export default function AdminProfile() {
         throw new Error("Erro ao salvar novo admin no banco de dados.");
       }
       await response.json();
-      alert("Mentor adicionado com sucesso!");
+      toast.success("Administrador cadastrado com sucesso.");
 
       setNewEmailMentor("");
       setSenhaMentor("");
     } catch (error) {
+      // The raw error was surfaced to the user before; keep it in the console.
       console.error(error);
-      alert(error);
+      toast.error(
+        "Não foi possível cadastrar o administrador. Verifique se o email já está em uso.",
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="w-screen h-screen overflow-x-clip ">
-      <div className="">
-        <header>
-          <button
-            type="button"
-            className={`open-menu hover:text-primary/60 ${
-              menuOpen ? "menu-icon hidden" : "menu-icon"
-            } absolute justify-between left-0 top-0`}
-            onClick={() => setMenuOpen(true)}
-          >
-            {" "}
-            ☰{" "}
-          </button>
-        </header>
-      </div>
+    <PageShell nav={{ role: "admin", id: String(adminId) }}>
+      <PageHeader
+        title="Perfil do administrador"
+        description="Sua conta e o cadastro de novos administradores do Arkana."
+      />
 
-      <div className="w-full h-full flex justify-center md:items-center transition-all duration-300 ease-in-out">
-        <MenuDesktopAdmin
-          menuOpen={menuOpen}
-          setMenuOpen={(arg: SetStateAction<boolean>) => setMenuOpen(arg)}
-        />
+      <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Conta ativa</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <InfoList>
+                <InfoRow label="Email" empty="Carregando…">
+                  {adminLogado}
+                </InfoRow>
+              </InfoList>
+            </CardContent>
+          </Card>
 
-        <MenuMobileAdmin />
+          <Card>
+            <CardHeader>
+              <CardTitle>Cadastrar novo administrador</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="mb-6 max-w-prose text-sm text-muted-foreground">
+                O novo administrador terá os mesmos acessos que você, incluindo o
+                histórico de contribuições de todos os grupos.
+              </p>
 
-        <section className="max-w-[90%] md:max-w-[1300px] md:mt-0 grid grid-cols-1 md:grid-cols-2  h-150 my-5 mb-10 gap-2">
-          <div className="flex flex-col gap-2 p-5 border border-gray-200 shadow-md bg-white rounded-xl">
-            <h1 className="text-3xl pt-8 text-primary mb-5 font-semibold">
-              {" "}
-              Perfil do Administrador
-            </h1>
-
-            <h3 className="text-xl font-semibold text-black  w-full">
-              {adminLogado}
-            </h3>
-
-            <h2 className="text-lg w-full">
-              Cadastre abaixo um novo administrador ao Arkana:
-            </h2>
-            <p className="font-sm text-gray-600">
-              {" "}
-              Ele terá os mesmos acessos que você, como o histórico de
-              contribuições de todos os grupos!
-            </p>
-
-            <div className=" mt-8">
-              <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-                <p> Email do novo administrador: </p>
-                <input
-                  type="text"
+              <form onSubmit={handleSubmit} className="max-w-md space-y-4">
+                <Field
+                  label="Email"
+                  name="EmailMentor"
+                  type="email"
+                  autoComplete="off"
+                  placeholder="novo.administrador@exemplo.com"
+                  value={newEmailMentor}
                   onChange={(e) => setNewEmailMentor(e.target.value)}
-                  value={newEmailMentor || ""}
-                  placeholder="NovoAdministrador@gmail.com"
-                  className="md:w-[85%] h-full  w-full focus:outline-none block min-h-9 border rounded-md border-gray-400 px-2 mb-3 text-black placeholder-gray-400 pt-1 text-base"
+                  required
                 />
-                <p> Senha do novo administrador: </p>
-                <input
+                <Field
+                  label="Senha"
+                  name="SenhaMentor"
                   type="password"
+                  autoComplete="new-password"
+                  hint="Ao menos 8 caracteres."
+                  minLength={8}
+                  value={senhaMentor}
                   onChange={(e) => setSenhaMentor(e.target.value)}
-                  value={senhaMentor || ""}
-                  placeholder="Senha do novo administrador"
-                  className="md:w-[85%] h-full  w-full focus:outline-none block min-h-9 border rounded-md border-gray-400 px-2 mb-3 text-black placeholder-gray-400 pt-1 text-base "
+                  required
                 />
-                <button
-                  type="submit"
-                  className="text-white bg-primary hover:bg-primary/80  self-start border border-gray-200 px-4 py-1 my-2 rounded-md  cursor-pointer font-medium transition"
-                >
-                  Cadastrar
-                </button>
+                <Button type="submit" loading={isSubmitting}>
+                  Cadastrar administrador
+                </Button>
               </form>
-            </div>
-          </div>
-          <div
-            className="bg-primary rounded-xl border border-gray-200 shadow-md p-10
-                flex flex-col items-center justify-center text-center gap-4 overflow-hidden min-h-[280px] md:min-h-[360px]"
-          >
-            <p className="text-white font-extrabold text-3xl md:text-4xl leading-tight break-words">
-              Arkana +<br />
-              Lideranças Empáticas
-            </p>
+            </CardContent>
+          </Card>
+        </div>
 
-            <img
-              src={Arkana.src}
-              alt="logo lideranças empáticas"
-              className="max-w-full h-auto w-[290px] md:w-[400px] object-contain"
-            />
-          </div>
-        </section>
+        <aside className="flex flex-col items-center justify-center gap-6 rounded-lg bg-primary p-8 text-center shadow-sm">
+          <p className="font-display text-3xl leading-tight text-primary-foreground">
+            Arkana
+            <br />+ Lideranças Empáticas
+          </p>
+          <Image
+            src={Arkana}
+            alt=""
+            width={240}
+            height={240}
+            className="h-auto w-full max-w-[15rem] object-contain"
+          />
+        </aside>
       </div>
-    </div>
+    </PageShell>
   );
 }

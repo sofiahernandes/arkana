@@ -1,13 +1,16 @@
 // Restricted contribution creation page. Coordinates form state, API submission, and receipt upload flow.
 "use client";
 
-import { SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import "@/styles/globals.css";
-import MenuDesktop from "@/components/menu";
-import MenuMobile from "@/components/menu-mobile";
+import { toast } from "sonner";
+
+import PageHeader from "@/components/layout/page-header";
+import PageShell from "@/components/layout/page-shell";
 import DonationsForm from "@/components/donations-forms";
 import FoodDonations from "@/components/food-donations";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   createMockContribution,
   getMockTeamByUser,
@@ -20,7 +23,6 @@ export default function Donations() {
   const [RaUsuario, setRaUsuario] = useState<number>(2001);
   const [team, setTeam] = useState<any>(null);
   const [user, setUser] = useState<any>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"finance" | "food">("finance");
 
@@ -68,8 +70,8 @@ export default function Donations() {
       !financialData.quantidade ||
       financialData.quantidade <= 0
     ) {
-      alert(
-        "Preencha todos os campos obrigatórios da contribuição financeira.",
+      toast.error(
+        "Informe a fonte e uma quantidade maior que zero para cadastrar a contribuição financeira.",
       );
       return;
     }
@@ -86,7 +88,7 @@ export default function Donations() {
           Gastos: Number(financialData.gastos) || 0,
           Fonte: financialData.fonte.trim(),
         });
-        alert("Contribuição financeira cadastrada com sucesso!");
+        toast.success("Contribuição financeira cadastrada com sucesso!");
         setFinancialData({
           fonte: "",
           meta: 0,
@@ -134,10 +136,23 @@ export default function Donations() {
         if (!resComprovante.ok) {
           const errorData = await resComprovante.json();
           console.warn("Erro ao enviar comprovante:", errorData);
+          // The contribution saved but its proof did not. Saying "sucesso"
+          // here would hide a loss the participant needs to act on.
+          toast.warning(
+            "Contribuição cadastrada, mas o comprovante não foi enviado. Anexe o comprovante novamente pelo histórico.",
+          );
+          setFinancialData({
+            fonte: "",
+            meta: 0,
+            gastos: 0,
+            quantidade: 0,
+            comprovante: null,
+          });
+          return;
         }
       }
 
-      alert("Contribuição financeira cadastrada com sucesso!");
+      toast.success("Contribuição financeira cadastrada com sucesso!");
 
       setFinancialData({
         fonte: "",
@@ -147,7 +162,10 @@ export default function Donations() {
         comprovante: null,
       });
     } catch (err: any) {
-      alert(`Erro ao cadastrar contribuição financeira: ${err.message}`);
+      console.error(err);
+      toast.error(
+        `Não foi possível cadastrar a contribuição financeira. ${err.message ?? "Tente novamente em instantes."}`,
+      );
     } finally {
       setLoading(false);
     }
@@ -158,7 +176,7 @@ export default function Donations() {
     if (loading || !RaUsuario) return;
 
     if (!foodData.idAlimento || foodData.idAlimento <= 0) {
-      alert("Selecione um alimento válido.");
+      toast.error("Selecione um alimento na lista para continuar.");
       return;
     }
 
@@ -169,8 +187,8 @@ export default function Donations() {
       !foodData.pesoUnidade ||
       foodData.pesoUnidade <= 0
     ) {
-      alert(
-        "Preencha todos os campos obrigatórios da contribuição alimentícia.",
+      toast.error(
+        "Informe a fonte, a quantidade e o peso por unidade para cadastrar a contribuição alimentícia.",
       );
       return;
     }
@@ -190,7 +208,7 @@ export default function Donations() {
           NomeAlimento: "Alimento",
           alimentos: [{ NomeAlimento: "Alimento", Pontuacao: 4 }],
         });
-        alert("Contribuição alimentícia cadastrada com sucesso!");
+        toast.success("Contribuição alimentícia cadastrada com sucesso!");
         setFoodData({
           fonte: "",
           meta: 0,
@@ -243,12 +261,24 @@ export default function Donations() {
         if (!resComprovante.ok) {
           const errorData = await resComprovante.json();
           console.error("Erro ao enviar comprovante:", errorData);
-        } else {
-          console.log("Comprovante enviado com sucesso!");
+          toast.warning(
+            "Contribuição cadastrada, mas o comprovante não foi enviado. Anexe o comprovante novamente pelo histórico.",
+          );
+          setFoodData({
+            fonte: "",
+            meta: 0,
+            gastos: 0,
+            idAlimento: 0,
+            quantidade: 0,
+            pesoUnidade: 0,
+            comprovante: null,
+          });
+          setTotaisPontos(0);
+          return;
         }
       }
 
-      alert("Contribuição alimentícia cadastrada com sucesso!");
+      toast.success("Contribuição alimentícia cadastrada com sucesso!");
 
       setFoodData({
         fonte: "",
@@ -261,69 +291,70 @@ export default function Donations() {
       });
       setTotaisPontos(0);
     } catch (err: any) {
-      alert(`Erro ao cadastrar contribuição alimentícia: ${err.message}`);
+      console.error(err);
+      toast.error(
+        `Não foi possível cadastrar a contribuição alimentícia. ${err.message ?? "Tente novamente em instantes."}`,
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="container w-full pt-6 md:pt-16 pb-26 md:pb-16 space-y-6">
-      <header className="w-full">
-        <button
-          className={`open-menu ${menuOpen ? "hidden" : "menu-icon"}`}
-          onClick={() => setMenuOpen(true)}
+    <PageShell nav={{ role: "user", id: String(RaUsuario) }}>
+      <PageHeader
+        title={
+          team?.NomeTime
+            ? `Nova contribuição — ${team.NomeTime}`
+            : "Nova contribuição"
+        }
+        description="Cadastre uma arrecadação financeira ou de alimentos e anexe o comprovante."
+      />
+
+      {/* Both forms sit side by side from lg up; below that they share one
+          column and this control picks which is showing. */}
+      <div
+        role="group"
+        aria-label="Tipo de contribuição"
+        className="sticky top-4 z-10 mb-6 grid grid-cols-2 gap-1 rounded-md border border-input bg-muted p-1 lg:hidden"
+      >
+        {(
+          [
+            ["finance", "Financeira"],
+            ["food", "Alimentos"],
+          ] as const
+        ).map(([value, label]) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => setActiveTab(value)}
+            aria-pressed={activeTab === value}
+            className={cn(
+              "h-10 rounded-sm text-sm font-medium",
+              "transition-colors duration-[--duration-base] ease-[--ease-out]",
+              "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+              activeTab === value
+                ? "bg-primary text-primary-foreground shadow-xs"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <section
+          className={cn(
+            activeTab === "finance" ? "flex" : "hidden",
+            "flex-col rounded-lg border border-border bg-card p-6 shadow-sm lg:flex",
+          )}
         >
-          ☰
-        </button>
+          <h2 className="mb-6 text-lg font-semibold text-primary">
+            Contribuição financeira
+          </h2>
 
-        <div className="sticky top-0 left-0 right-0 z-10">
-          <div className="lg:hidden w-full flex justify-center">
-            <div className="inline-grid grid-cols-2 w-full rounded-full border border-gray bg-white p-1 shadow-sm">
-              <button
-                type="button"
-                onClick={() => setActiveTab("finance")}
-                className={`rounded-full p-3 text-sm font-medium ${
-                  activeTab === "finance"
-                    ? "bg-primary text-white"
-                    : "text-black"
-                }`}
-              >
-                Financeira
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("food")}
-                className={`rounded-full p-3 text-sm font-medium ${
-                  activeTab === "food" ? "bg-primary text-white" : "text-black"
-                }`}
-              >
-                Alimentos
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <div className="page-container">
-        <MenuDesktop menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
-        <MenuMobile />
-
-        <main className="flex flex-col justify-center items-stretch w-full px-4">
-          <div className="flex flex-col gap-2 text-center mb-8">
-            <h3 className="text-2xl uppercase font-semibold text-primary">
-              Nova contribuição ao time {team?.NomeTime && team?.NomeTime}
-            </h3>
-          </div>
-          <div className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 lg:gap-x-4">
-            <div
-              className={`${
-                activeTab === "finance" ? "block" : "hidden"
-              } lg:block bg-white border border-gray-200 p-6 rounded-xl shadow-md w-full min-h-[600px]`}
-            >
-              <h2 className="text-2xl font-semibold mb-4">Financeiras</h2>
-
-              <DonationsForm
+          <DonationsForm
                 fonte={financialData.fonte}
                 setFonte={(v) =>
                   setFinancialData({ ...financialData, fonte: v })
@@ -350,27 +381,29 @@ export default function Donations() {
                 setRaUsuario={setRaUsuario}
               />
 
-              <div className="mt-13 flex justify-end">
-                <button
-                  type="button"
-                  onClick={handleFinancialSubmit}
-                  disabled={loading}
-                  className="w-fit px-4 py-2 rounded-[8px] bg-primary text-white hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? "Enviando..." : "Cadastrar"}
-                </button>
-              </div>
-            </div>
-
-            <div
-              className={`${
-                activeTab === "food" ? "block" : "hidden"
-              } lg:flex lg:flex-col bg-white border border-gray-200 p-6 rounded-xl shadow-md w-full min-h-[600px]`}
+          <div className="mt-8 flex justify-end">
+            <Button
+              type="button"
+              onClick={handleFinancialSubmit}
+              loading={loading}
             >
-              <h2 className="text-2xl font-semibold mb-3">Alimentícias</h2>
+              Cadastrar
+            </Button>
+          </div>
+        </section>
 
-              <div className="min-h-0 flex-1 overflow-y-auto rounded-lg">
-                <FoodDonations
+        <section
+          className={cn(
+            activeTab === "food" ? "flex" : "hidden",
+            "flex-col rounded-lg border border-border bg-card p-6 shadow-sm lg:flex",
+          )}
+        >
+          <h2 className="mb-6 text-lg font-semibold text-primary">
+            Contribuição alimentícia
+          </h2>
+
+          <div className="min-h-0 flex-1">
+            <FoodDonations
                   fonte={foodData.fonte}
                   setFonte={(v) => setFoodData({ ...foodData, fonte: v })}
                   meta={foodData.meta}
@@ -399,24 +432,20 @@ export default function Donations() {
                 />
               </div>
 
-              <div className="mt-4 flex flex-none items-center gap-3 justify-end">
-                <div className="bg-secondary/50 text-sm rounded-lg py-2 px-2 md:px-16 wrap-anywhere w-[300px] text-ellipsis">
-                  Pontuação: <span>{totaisPontos.toLocaleString("pt-BR")}</span>
-                </div>
+          <div className="mt-8 flex flex-wrap items-center justify-end gap-3">
+            <p className="rounded-md bg-terciary px-3 py-2 text-sm text-terciary-foreground">
+              Pontuação{" "}
+              <span className="font-semibold tabular-nums">
+                {totaisPontos.toLocaleString("pt-BR")}
+              </span>
+            </p>
 
-                <button
-                  type="button"
-                  onClick={handleFoodSubmit}
-                  disabled={loading}
-                  className="w-fit px-4 py-2 rounded-lg bg-primary text-white hover:bg-[#195b41] disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? "Enviando..." : "Cadastrar"}
-                </button>
-              </div>
-            </div>
+            <Button type="button" onClick={handleFoodSubmit} loading={loading}>
+              Cadastrar
+            </Button>
           </div>
-        </main>
+        </section>
       </div>
-    </div>
+    </PageShell>
   );
 }
