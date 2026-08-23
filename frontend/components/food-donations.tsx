@@ -1,12 +1,12 @@
 // Food donation list/presentation component used in contribution history views.
 "use client";
 
-import Image, { StaticImageData } from "next/image";
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import uploadStatic from "@/assets/icons/upload-static.png";
-import uploadGif from "@/assets/icons/upload-anim.gif";
+import React, { useEffect, useMemo } from "react";
+import { Paperclip } from "lucide-react";
 
-type Img = StaticImageData | string;
+import Field from "@/components/forms/field";
+import { Button } from "@/components/ui/button";
+import { useFileUpload } from "@/hooks/use-file-upload";
 
 interface Properties {
   quantidade: number;
@@ -35,6 +35,28 @@ interface Properties {
   }) => void;
 }
 
+const ALIMENTOS = [
+  { id: 1, nome: "Arroz Polido" },
+  { id: 2, nome: "Feijão Preto" },
+  { id: 3, nome: "Leite em Pó" },
+  { id: 4, nome: "Óleo de Soja" },
+  { id: 5, nome: "Açúcar Refinado" },
+  { id: 6, nome: "Fubá" },
+  { id: 7, nome: "Macarrão" },
+  { id: 8, nome: "Outros" },
+];
+
+const PONTOS_POR_KG: Record<string, number> = {
+  "Arroz Polido": 4,
+  "Feijão Preto": 5.5,
+  "Açúcar Refinado": 4,
+  "Leite em Pó": 15,
+  Fubá: 2.5,
+  Macarrão: 2.5,
+  "Óleo de Soja": 7,
+  Outros: 0,
+};
+
 export default function FoodDonations({
   fonte,
   setFonte,
@@ -53,32 +75,7 @@ export default function FoodDonations({
   onTotaisChange,
   onAlimentoChange,
 }: Properties) {
-  const [loading, setLoading] = useState(false);
-  const [picking, setPicking] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const timerRef = useRef<number | null>(null);
-
-  const ALIMENTOS = [
-    { id: 1, nome: "Arroz Polido" },
-    { id: 2, nome: "Feijão Preto" },
-    { id: 3, nome: "Leite em Pó" },
-    { id: 4, nome: "Óleo de Soja" },
-    { id: 5, nome: "Açúcar Refinado" },
-    { id: 6, nome: "Fubá" },
-    { id: 7, nome: "Macarrão" },
-    { id: 8, nome: "Outros" },
-  ];
-
-  const PONTOS_POR_KG: Record<string, number> = {
-    "Arroz Polido": 4,
-    "Feijão Preto": 5.5,
-    "Açúcar Refinado": 4,
-    "Leite em Pó": 15,
-    Fubá: 2.5,
-    Macarrão: 2.5,
-    "Óleo de Soja": 7,
-    Outros: 0,
-  };
+  const upload = useFileUpload({ onChange: setComprovante });
 
   // Sanitizes the incoming numeric props on mount so the derived food totals start from valid integer values.
   useEffect(() => {
@@ -118,118 +115,57 @@ export default function FoodDonations({
     });
   }, [totais, gastos]);
 
-  // Resets the upload animation state and cancels any pending timeout after file selection finishes.
-  const stopGif = () => {
-    setPicking(false);
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
-  };
-
-  // Opens the hidden file input used to attach the food donation receipt.
-  const handlePickClick = () => {
-    if (loading) return;
-    if (timerRef.current) clearTimeout(timerRef.current);
-    fileInputRef.current?.click();
-  };
-
-  // Rejects unsupported receipt files before they reach the backend upload endpoint.
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.currentTarget.files?.[0] ?? null;
-    if (!file) {
-      setComprovante(null);
-      stopGif();
-      return;
-    }
-
-    const validTypes = [
-      "image/png",
-      "image/jpeg",
-      "image/jpg",
-      "application/pdf",
-    ];
-    const isValidType = validTypes.includes(file.type);
-    const isValidSize = file.size <= 5 * 1024 * 1024;
-
-    if (!isValidType) {
-      alert("Formato inválido. Use PNG, JPEG ou PDF.");
-      stopGif();
-      return;
-    }
-
-    if (!isValidSize) {
-      alert("Arquivo muito grande (máx. 5MB).");
-      stopGif();
-      return;
-    }
-
-    setPicking(true);
-    setComprovante(file);
-    e.target.value = "";
-
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = window.setTimeout(() => stopGif(), 1000);
-  };
+  /** Every numeric field here is whole units, so the parse is the same each time. */
+  const toInt = (value: string) => (value === "" ? 0 : Math.floor(Number(value)));
 
   return (
-    <div className="flex flex-col gap-3 w-full">
-      <div>
-        <label>Nome do Evento</label>
-        <input
-          className="w-full bg-white border border-gray-300 rounded-lg px-3 py-1.5 text-black"
+    <div className="flex w-full flex-col gap-3">
+      <Field
+        label="Nome do Evento"
+        name="fonte"
+        type="text"
+        placeholder="Ex: Instituto Alma"
+        value={fonte}
+        onChange={(e) => setFonte(e.target.value)}
+      />
+
+      <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-3">
+        <Field
+          label="Meta"
+          name="meta"
+          type="number"
+          placeholder="100 Kg"
+          value={meta === 0 ? "" : meta}
+          onChange={(e) => setMeta(toInt(e.target.value))}
+        />
+
+        <Field
+          label="Gastos"
+          name="gastos"
+          type="number"
+          placeholder="Ex: R$100"
+          value={gastos === 0 ? "" : gastos}
+          onChange={(e) => setGastos(toInt(e.target.value))}
+        />
+
+        <Field
+          label="Total em Kg"
+          name="kgTotal"
           type="text"
-          placeholder="Ex: Instituto Alma"
-          value={fonte}
-          onChange={(e) => setFonte(e.target.value)}
+          readOnly
+          value={totais.kgTotal.toLocaleString("pt-BR")}
+          controlClassName="text-center"
+          hint="Calculado automaticamente"
         />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
-        <div>
-          <label>Meta</label>
-          <input
-            className="h-10 w-full bg-white border border-gray-300 rounded-lg px-3"
-            type="number"
-            placeholder="100 Kg"
-            value={meta === 0 ? "" : meta}
-            onChange={(e) => {
-              const v = e.target.value;
-              setMeta(v === "" ? 0 : Math.floor(Number(v)));
-            }}
-          />
-        </div>
-
-        <div>
-          <label>Gastos</label>
-          <input
-            className="h-10 w-full bg-white border border-gray-300 rounded-lg px-3"
-            type="number"
-            placeholder="Ex: R$100"
-            value={gastos === 0 ? "" : gastos}
-            onChange={(e) => {
-              const v = e.target.value;
-              setGastos(v === "" ? 0 : Math.floor(Number(v)));
-            }}
-          />
-        </div>
-
-        <div>
-          <label>Total em Kg</label>
-          <input
-            type="text"
-            readOnly
-            value={totais.kgTotal.toLocaleString("pt-BR")}
-            className="h-10 w-full bg-white border border-gray-300 rounded-lg px-3 text-center"
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-col md:flex-row gap-4 mt-2">
-        <div className="md:w-[40%]">
-          <div>Alimento</div>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+        <Field label="Alimento" name="idAlimento" className="md:col-span-2">
+          {/* A native select is keyboard- and mobile-native; it only needed the tokens. */}
           <select
-            className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2"
+            id="field-idAlimento"
+            name="idAlimento"
+            className="h-10 w-full rounded-md border border-input bg-card px-3 text-sm shadow-xs outline-none transition-[color,box-shadow,border-color] duration-[--duration-base] ease-[--ease-out] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40"
             value={idAlimento}
             onChange={(e) => setIdAlimento(parseInt(e.target.value))}
           >
@@ -239,67 +175,73 @@ export default function FoodDonations({
               </option>
             ))}
           </select>
-        </div>
+        </Field>
 
-        <div className="md:w-[25%]">
-          <div>Unidades</div>
-          <input
-            className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-center"
-            type="number"
-            placeholder="Qtd"
-            value={quantidade === 0 ? "" : quantidade}
-            onChange={(e) => {
-              const v = e.target.value;
-              setQuantidade(v === "" ? 0 : Math.floor(Number(v)));
-            }}
-          />
-        </div>
+        <Field
+          label="Unidades"
+          name="quantidade"
+          type="number"
+          placeholder="Qtd"
+          controlClassName="text-center"
+          value={quantidade === 0 ? "" : quantidade}
+          onChange={(e) => setQuantidade(toInt(e.target.value))}
+        />
 
-        <div className="md:w-[25%]">
-          <div>Kg/Unidade</div>
-          <input
-            className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-center"
-            type="number"
-            step="1"
-            placeholder="Kg"
-            value={pesoUnidade === 0 ? "" : pesoUnidade}
-            onChange={(e) => {
-              const v = e.target.value;
-              setPesoUnidade(v === "" ? 0 : Math.floor(Number(v)));
-            }}
-          />
-        </div>
+        <Field
+          label="Kg/Unidade"
+          name="pesoUnidade"
+          type="number"
+          step="1"
+          placeholder="Kg"
+          controlClassName="text-center"
+          value={pesoUnidade === 0 ? "" : pesoUnidade}
+          onChange={(e) => setPesoUnidade(toInt(e.target.value))}
+        />
       </div>
 
-      <label className="block mt-9">Imagem (Comprovações)</label>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/png,image/jpeg,image/jpg,application/pdf"
-        onChange={handleFileChange}
-        className="hidden"
-      />
+      <div className="mt-8 space-y-1.5">
+        <span className="block text-sm font-medium">Imagem (Comprovações)</span>
+        <input
+          ref={upload.inputRef}
+          type="file"
+          accept={upload.accept}
+          onChange={upload.handleInputChange}
+          className="hidden"
+          aria-hidden="true"
+          tabIndex={-1}
+        />
 
-      <div className="flex items-center">
-        <button
-          type="button"
-          onClick={handlePickClick}
-          className="inline-flex items-center justify-center h-14 w-18 rounded-lg bg-white transition"
-          disabled={loading}
-        >
-          <Image
-            src={picking ? (uploadGif as Img) : (uploadStatic as Img)}
-            alt="Selecionar comprovante"
-            width={35}
-            height={35}
-            draggable={false}
-          />
-        </button>
-        <span className="ml-3 text-sm text-gray-700">
-          {comprovante instanceof File
-            ? `Selecionado: ${comprovante.name}`
-            : "Nenhum arquivo escolhido"}
-        </span>
+        <div className="flex items-center gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={upload.pick}
+            className={`h-14 w-16 ${upload.pressed ? "animate-selected-pop" : ""}`}
+            aria-label="Selecionar comprovante"
+          >
+            <Paperclip className="size-5" strokeWidth={1.75} aria-hidden />
+          </Button>
+
+          {upload.previewUrl && (
+            <img
+              src={upload.previewUrl}
+              alt="Pré-visualização do comprovante"
+              className="h-14 w-14 rounded-md border border-border object-cover"
+            />
+          )}
+
+          <span className="text-sm text-muted-foreground">
+            {comprovante instanceof File
+              ? `Selecionado: ${comprovante.name}`
+              : "Nenhum arquivo escolhido"}
+          </span>
+        </div>
+
+        {upload.error && (
+          <p role="alert" className="text-sm font-medium text-destructive">
+            {upload.error}
+          </p>
+        )}
       </div>
     </div>
   );

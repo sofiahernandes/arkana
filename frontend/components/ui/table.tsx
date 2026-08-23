@@ -19,11 +19,17 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
   )
 }
 
+// Blush header with plum text: keeps the rose identity at 9.8:1, where the
+// previous white-on-rose sat at 3.7:1. A saturated rose fill would also compete
+// with the rose reserved for actions.
 function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   return (
     <thead
       data-slot="table-header"
-      className={cn("[&_tr]:border-b border-gray-400 bg-secondary!", className)}
+      className={cn(
+        "bg-terciary [&_tr]:border-b [&_tr]:border-border",
+        className
+      )}
       {...props}
     />
   )
@@ -33,7 +39,7 @@ function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
   return (
     <tbody
       data-slot="table-body"
-      className={cn("[&_tr:last-child]:border-0 border-gray-200", className)}
+      className={cn("[&_tr:last-child]:border-0 border-border", className)}
       {...props}
     />
   )
@@ -44,7 +50,7 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
     <tfoot
       data-slot="table-footer"
       className={cn(
-        "bg-muted/50 border-t border-gray-200 font-medium [&>tr]:last:border-b-0",
+        "bg-muted/50 border-t border-border font-medium [&>tr]:last:border-b-0",
         className
       )}
       {...props}
@@ -57,7 +63,7 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
     <tr
       data-slot="table-row"
       className={cn(
-        "data-[state=selected]:bg-muted border-b border-gray-200",
+        "data-[state=selected]:bg-muted border-b border-border",
         className
       )}
       {...props}
@@ -70,7 +76,7 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
     <th
       data-slot="table-head"
       className={cn(
-        "text-white h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+        "h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-terciary-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
         className
       )}
       {...props}

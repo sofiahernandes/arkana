@@ -5,22 +5,27 @@ import React from "react";
 import BackHome from "@/components/buttons/back";
 import { useRouter } from "next/navigation";
 
+import Field from "@/components/forms/field";
+import { Button } from "@/components/ui/button";
+
 interface Props {
   raUsuario: number;
 }
 
+/** Members 2–8 are required by the backend (it wants 0, not null); 9 and 10 are optional. */
+const MEMBROS = [2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
+const OPCIONAIS = new Set([9, 10]);
+
 export default function TeamTabs({ raUsuario }: Props) {
   const router = useRouter();
   const [NomeTime, setNomeTime] = React.useState("");
-  const [RaAluno2, setRaAluno2] = React.useState("");
-  const [RaAluno3, setRaAluno3] = React.useState("");
-  const [RaAluno4, setRaAluno4] = React.useState("");
-  const [RaAluno5, setRaAluno5] = React.useState("");
-  const [RaAluno6, setRaAluno6] = React.useState("");
-  const [RaAluno7, setRaAluno7] = React.useState("");
-  const [RaAluno8, setRaAluno8] = React.useState("");
-  const [RaAluno9, setRaAluno9] = React.useState("");
-  const [RaAluno10, setRaAluno10] = React.useState("");
+  // Nine sibling useState calls collapsed into the shape the payload needs.
+  const [ras, setRas] = React.useState<Record<number, string>>({});
+  const [submitting, setSubmitting] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const setRa = (numero: number, valor: string) =>
+    setRas((atual) => ({ ...atual, [numero]: valor }));
 
   // Creates the team from the onboarding form and redirects the new leader to the first contribution screen.
   const handleSubmit = async (e: React.FormEvent) => {
@@ -29,8 +34,9 @@ export default function TeamTabs({ raUsuario }: Props) {
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     if (!backendUrl) {
-      console.error("NEXT_PUBLIC_BACKEND_URL não está configurada");
-      alert("Erro de configuração. Entre em contato com o suporte.");
+      setError(
+        "O endereço do servidor não está configurado (NEXT_PUBLIC_BACKEND_URL). Avise a coordenação do projeto antes de tentar de novo.",
+      );
       return;
     }
 
@@ -38,7 +44,8 @@ export default function TeamTabs({ raUsuario }: Props) {
       ? `${backendUrl}api/createTeam`
       : `${backendUrl}/api/createTeam`;
 
-    console.log("Tentando conectar em:", apiUrl);
+    setSubmitting(true);
+    setError(null);
 
     try {
       const res = await fetch(apiUrl, {
@@ -49,40 +56,36 @@ export default function TeamTabs({ raUsuario }: Props) {
         body: JSON.stringify({
           NomeTime: NomeTime,
           RaUsuario: Number(raUsuario),
-          RaAluno2: Number(RaAluno2) || 0,
-          RaAluno3: Number(RaAluno3) || 0,
-          RaAluno4: Number(RaAluno4) || 0,
-          RaAluno5: Number(RaAluno5) || 0,
-          RaAluno6: Number(RaAluno6) || 0,
-          RaAluno7: Number(RaAluno7) || 0,
-          RaAluno8: Number(RaAluno8) || 0,
-          RaAluno9: Number(RaAluno9) || null,
-          RaAluno10: Number(RaAluno10) || null,
+          ...Object.fromEntries(
+            MEMBROS.map((numero) => [
+              `RaAluno${numero}`,
+              Number(ras[numero]) || (OPCIONAIS.has(numero) ? null : 0),
+            ]),
+          ),
         }),
       });
 
       if (!res.ok) {
-        const err = await res
-          .json()
-          .catch(() => ({ error: "Erro desconhecido" }));
-        console.error("Erro da API:", err);
-        alert("Erro: " + (err.error || `Status ${res.status}`));
+        const body = await res.json().catch(() => null);
+        console.error("Erro da API:", body);
+        setError(
+          body?.error ??
+            body?.message ??
+            `O servidor recusou o cadastro do time (status ${res.status}). Confira o nome e os R.A. informados.`,
+        );
         return;
       }
 
-      const newTeam = await res.json();
-
       router.push(`user/${raUsuario}/new-contribution`);
-    } catch (error) {
-      console.error("Erro ao cadastrar time:", error);
-
-      if (error instanceof TypeError && error.message === "Failed to fetch") {
-        alert(
-          "Erro de conexão. Verifique se o backend está rodando e se a URL está correta.",
-        );
-      } else {
-        alert("Erro ao cadastrar time: " + error);
-      }
+    } catch (err) {
+      console.error("Erro ao cadastrar time:", err);
+      setError(
+        err instanceof TypeError && err.message === "Failed to fetch"
+          ? "Não foi possível falar com o servidor. Verifique sua conexão e tente novamente — o time não foi criado."
+          : "Não foi possível cadastrar o time. Tente novamente em instantes.",
+      );
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -92,10 +95,10 @@ export default function TeamTabs({ raUsuario }: Props) {
         <BackHome />
       </div>
 
-      <div className="min-h-screen flex justify-center items-center p-6">
-        <div className="flex flex-col md:flex-row w-full max-w-3xl">
-          <section className="bg-primary h-120 m-1 flex flex-col rounded-lg items-center justify-center md:w-1/2 p-6 text-white max-w-screen">
-            <h1 className="flex text-center font-bold text-[#fff] text-[22px] mb-1">
+      <div className="flex min-h-screen items-center justify-center p-6">
+        <div className="flex w-full max-w-3xl flex-col md:flex-row">
+          <section className="m-1 flex h-120 max-w-screen flex-col items-center justify-center rounded-lg bg-primary p-6 text-primary-foreground md:w-1/2">
+            <h1 className="mb-1 flex text-center text-2xl font-bold">
               Cadastro de
               <br />
               time
@@ -107,125 +110,46 @@ export default function TeamTabs({ raUsuario }: Props) {
             />
           </section>
 
-          <section className="border border-gray-300 py-5 rounded-lg m-1 flex flex-col items-start justify-start md:w-[400px] overflow-y-scroll h-[480px] max-w-screen">
-            <form onSubmit={handleSubmit} className="w-full">
-              <div className="text-base mb-1 mt-1 mr-4 ml-4">
-                Nome fantasia do grupo
-                <input
-                  type="text"
-                  name="NomeTime"
-                  placeholder="Insira o nome aqui"
-                  className="block w-full mr-2 bg-[white] border border-[#b4b4b4] rounded-lg text-black placeholder-gray-400 px-3 py-2 text-base focus:outline-none"
-                  value={NomeTime}
-                  onChange={(e) => setNomeTime(e.target.value)}
-                />
-              </div>
-              <div className="text-base mb-1 mt-1 mr-4 ml-4">
-                Ra Aluno 2
-                <input
-                  type="text"
-                  name="RaAluno2"
-                  placeholder="Insira o número do RA"
-                  className="block w-full mr-2 bg-[white] border border-[#b4b4b4] rounded-lg text-black placeholder-gray-400 px-3 py-2 text-base focus:outline-none"
-                  value={RaAluno2}
-                  onChange={(e) => setRaAluno2(e.target.value)}
-                />
-              </div>
-              <div className="text-base mb-1 mt-1 mr-4 ml-4">
-                Ra Aluno 3
-                <input
-                  type="text"
-                  name="RaAluno3"
-                  placeholder="Insira o número do RA"
-                  className="block w-full mr-2 bg-[white] border border-[#b4b4b4] rounded-lg text-black placeholder-gray-400 px-3 py-2 text-base focus:outline-none"
-                  value={RaAluno3}
-                  onChange={(e) => setRaAluno3(e.target.value)}
-                />
-              </div>
-              <div className="text-base mb-1 mt-1 mr-4 ml-4">
-                Ra Aluno 4
-                <input
-                  type="text"
-                  name="RaAluno4"
-                  placeholder="Insira o número do RA"
-                  className="block w-full  mr-2 bg-[white] border border-[#b4b4b4] rounded-lg text-black placeholder-gray-400 px-3 py-2 text-base focus:outline-none"
-                  value={RaAluno4}
-                  onChange={(e) => setRaAluno4(e.target.value)}
-                />
-              </div>
-              <div className="text-base mb-1 mt-1 mr-4 ml-4">
-                Ra Aluno 5
-                <input
-                  type="text"
-                  name="RaAluno5"
-                  placeholder="Insira o número do RA"
-                  className="block w-full mr-2 bg-[white] border border-[#b4b4b4] rounded-lg text-black placeholder-gray-400 px-3 py-2 text-base focus:outline-none"
-                  value={RaAluno5}
-                  onChange={(e) => setRaAluno5(e.target.value)}
-                />
-              </div>
+          <section className="m-1 flex h-120 max-w-screen flex-col items-start justify-start overflow-y-auto rounded-lg border border-border bg-card py-5 md:w-100">
+            <form onSubmit={handleSubmit} className="flex w-full flex-col gap-3 px-4">
+              <Field
+                label="Nome fantasia do grupo"
+                name="NomeTime"
+                type="text"
+                placeholder="Insira o nome aqui"
+                value={NomeTime}
+                onChange={(e) => setNomeTime(e.target.value)}
+                required
+              />
 
-              <div className="text-base mb-1 mt-1 mr-4 ml-4">
-                Ra Aluno 6
-                <input
+              {MEMBROS.map((numero) => (
+                <Field
+                  key={numero}
+                  label={`Ra Aluno ${numero}`}
+                  name={`RaAluno${numero}`}
                   type="text"
-                  name="RaAluno6"
+                  inputMode="numeric"
                   placeholder="Insira o número do RA"
-                  className="block w-full mr-2 bg-[white] border border-[#b4b4b4] rounded-lg text-black placeholder-gray-400 px-3 py-2 text-base focus:outline-none"
-                  value={RaAluno6}
-                  onChange={(e) => setRaAluno6(e.target.value)}
+                  hint={OPCIONAIS.has(numero) ? "Opcional" : undefined}
+                  value={ras[numero] ?? ""}
+                  onChange={(e) => setRa(numero, e.target.value)}
                 />
-              </div>
-              <div className="text-base mb-1 mt-1 mr-4 ml-4">
-                Ra Aluno 7
-                <input
-                  type="text"
-                  name="RaAluno7"
-                  placeholder="Insira o número do RA"
-                  className="block w-full mr-2 bg-[white] border border-[#b4b4b4] rounded-lg text-black placeholder-gray-400 px-3 py-2 text-base focus:outline-none"
-                  value={RaAluno7}
-                  onChange={(e) => setRaAluno7(e.target.value)}
-                />
-              </div>
-              <div className="text-base mb-1 mt-1 mr-4 ml-4">
-                Ra Aluno 8
-                <input
-                  type="text"
-                  name="RaAluno8"
-                  placeholder="Insira o número do RA"
-                  className="block w-full mr-2 bg-[white] border border-[#b4b4b4] rounded-lg text-black placeholder-gray-400 px-3 py-2 text-base focus:outline-none"
-                  value={RaAluno8}
-                  onChange={(e) => setRaAluno8(e.target.value)}
-                />
-              </div>
-              <div className="text-base mb-1 mt-1 mr-4 ml-4">
-                Ra Aluno 9
-                <input
-                  type="text"
-                  name="RaAluno9"
-                  placeholder="Insira o número do RA"
-                  className="block w-full mr-2 bg-[white] border border-[#b4b4b4] rounded-lg text-black placeholder-gray-400 px-3 py-2 text-base focus:outline-none"
-                  value={RaAluno9}
-                  onChange={(e) => setRaAluno9(e.target.value)}
-                />
-              </div>
-              <div className="text-base mb-1 mt-1 mr-4 ml-4">
-                Ra Aluno 10
-                <input
-                  type="text"
-                  name="RaAluno10"
-                  placeholder="Insira o número do RA"
-                  className="block w-full mr-2 bg-[white] border border-[#b4b4b4] rounded-lg text-black placeholder-gray-400 px-3 py-2 text-base focus:outline-none"
-                  value={RaAluno10}
-                  onChange={(e) => setRaAluno10(e.target.value)}
-                />
-              </div>
-              <button
+              ))}
+
+              {error && (
+                <p role="alert" className="text-sm font-medium text-destructive">
+                  {error}
+                </p>
+              )}
+
+              <Button
                 type="submit"
-                className="border-transparent text-white hover:text-white! hover:bg-secondary/80 py-2 px-6 m-4 bg-secondary self-end rounded-lg"
+                variant="secondary"
+                loading={submitting}
+                className="mt-1 self-end"
               >
-                Cadastrar
-              </button>
+                {submitting ? "Cadastrando…" : "Cadastrar"}
+              </Button>
             </form>
           </section>
         </div>

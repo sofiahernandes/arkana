@@ -1,12 +1,12 @@
 // Financial donation form block. Manages numeric inputs and receipt file selection before submission.
 "use client";
 
-import React, { useRef, useState, useEffect } from "react";
-import Image, { StaticImageData } from "next/image";
-import uploadStatic from "@/assets/icons/upload-static.png";
-import uploadGif from "@/assets/icons/upload-anim.gif";
+import React, { useState, useEffect } from "react";
+import { Paperclip } from "lucide-react";
 
-type Img = StaticImageData | string;
+import Field from "@/components/forms/field";
+import { Button } from "@/components/ui/button";
+import { useFileUpload } from "@/hooks/use-file-upload";
 
 interface Properties {
   RaUsuario: number;
@@ -28,10 +28,6 @@ interface Properties {
 }
 
 export default function DonationsForm({
-  RaUsuario,
-  setRaUsuario,
-  tipoDoacao,
-  setTipoDoacao,
   quantidade,
   setQuantidade,
   fonte,
@@ -43,18 +39,11 @@ export default function DonationsForm({
   comprovante,
   setComprovante,
 }: Properties) {
-  const [loading, setLoading] = useState(false);
-  const [picking, setPicking] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const timerRef = useRef<number | null>(null);
-
   const [metaInput, setMetaInput] = useState<string>("");
   const [gastosInput, setGastosInput] = useState<string>("");
   const [quantidadeInput, setQuantidadeInput] = useState<string>("");
 
-  // Normalizes decimal input before converting it to a number so form fields accept the local comma format.
-  const normalize = (s: string) => s.replace(",", ".").trim();
-  const toNumberOrNaN = (s: string) => Number(normalize(s));
+  const upload = useFileUpload({ onChange: setComprovante });
 
   // Mirrors the external numeric state back into the visible input strings after parent resets or prefills.
   useEffect(() => {
@@ -62,90 +51,6 @@ export default function DonationsForm({
     setGastosInput(gastos ? String(gastos) : "");
     setQuantidadeInput(quantidade ? String(quantidade) : "");
   }, [meta, gastos, quantidade]);
-
-  // Injects the small upload animation once and also clears any pending timer when the component unmounts.
-  useEffect(() => {
-    const style = document.createElement("style");
-    style.innerHTML = `
-      @keyframes pop { 
-        0% { transform: scale(1); } 
-        40% { transform: scale(1.12); } 
-        100% { transform: scale(1); } 
-      }
-      .animate-pop { animation: pop 150ms ease-out; }
-      @media (prefers-reduced-motion: reduce) {
-        .animate-pop { animation: none !important; }
-      }
-    `;
-    document.head.appendChild(style);
-    return () => {
-      if (timerRef.current) {
-        window.clearTimeout(timerRef.current);
-        timerRef.current = null;
-      }
-    };
-  }, []);
-
-  // Stops the temporary upload animation and clears the timer used to return the button to the idle state.
-  const stopGif = () => {
-    setPicking(false);
-    if (timerRef.current) {
-      window.clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
-  };
-
-  // Opens the hidden file input while briefly switching the button to the animated upload state.
-  const handlePickClick = () => {
-    if (loading) return;
-    setPicking(true);
-    if (timerRef.current) window.clearTimeout(timerRef.current);
-    timerRef.current = window.setTimeout(() => stopGif(), 1000);
-    fileInputRef.current?.click();
-  };
-
-  // Adds a second unmount cleanup for the upload timer so stale callbacks do not run after navigation.
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) {
-        window.clearTimeout(timerRef.current);
-        timerRef.current = null;
-      }
-    };
-  }, []);
-
-  // Validates the selected receipt file locally before the submit handler tries to upload it.
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.currentTarget.files?.[0] ?? null;
-
-    if (!file) {
-      setComprovante(null);
-      stopGif();
-      return;
-    }
-
-    const okType = [
-      "image/png",
-      "image/jpeg",
-      "image/jpg",
-      "application/pdf",
-    ].includes(file.type);
-    const okSize = file.size <= 5 * 1024 * 1024;
-
-    if (!okType) {
-      alert("Formato inválido. Use PNG, JPEG ou PDF.");
-      stopGif();
-      return;
-    }
-    if (!okSize) {
-      alert("Arquivo muito grande (máx. 5MB).");
-      stopGif();
-      return;
-    }
-
-    setComprovante(file);
-    stopGif();
-  };
 
   // Keeps the text input responsive while also updating the parsed numeric value used by the submit payload.
   const handleQuantidadeChange = (value: string) => {
@@ -169,87 +74,93 @@ export default function DonationsForm({
   };
 
   return (
-    <div className="flex flex-col gap-4 w-full">
-      <div className="rounded-xl">
-        <label className="block mb-1">Nome do Evento / Doador</label>
-        <input
-          type="text"
-          placeholder="Ex: Instituto Alma"
-          value={fonte}
-          onChange={(e) => setFonte(e.currentTarget.value)}
-          className="w-full bg-white border border-gray-300 rounded-lg px-3 py-1.5"
-        />
+    <div className="flex w-full flex-col gap-4">
+      <Field
+        label="Nome do Evento / Doador"
+        name="fonte"
+        type="text"
+        placeholder="Ex: Instituto Alma"
+        value={fonte}
+        onChange={(e) => setFonte(e.currentTarget.value)}
+      />
 
-        <label className="block mb-1 mt-3">Meta (R$)</label>
-        <input
-          type="text"
-          inputMode="decimal"
-          placeholder="Ex: R$100"
-          value={metaInput}
-          onChange={(e) => handleMetaChange(e.currentTarget.value)}
-          className="w-full bg-white border border-gray-300 rounded px-3 py-1.5"
-        />
+      <Field
+        label="Meta (R$)"
+        name="meta"
+        type="text"
+        inputMode="decimal"
+        placeholder="Ex: R$100"
+        value={metaInput}
+        onChange={(e) => handleMetaChange(e.currentTarget.value)}
+      />
 
-        <label className="block mb-1 mt-3">Gastos (R$)</label>
-        <input
-          type="number"
-          step="0.01"
-          placeholder="Ex: R$100"
-          value={gastosInput}
-          onChange={(e) => handleGastosChange(e.currentTarget.value)}
-          className="w-full bg-white border border-gray-300 rounded-lg px-3 py-1.5"
-        />
+      <Field
+        label="Gastos (R$)"
+        name="gastos"
+        type="number"
+        step="0.01"
+        placeholder="Ex: R$100"
+        value={gastosInput}
+        onChange={(e) => handleGastosChange(e.currentTarget.value)}
+      />
 
-        <label className="block mb-1 mt-3">Valor Arrecadado</label>
-        <input
-          type="number"
-          step="0.01"
-          placeholder="Ex: R$100"
-          value={quantidadeInput}
-          onChange={(e) => handleQuantidadeChange(e.currentTarget.value)}
-          className="w-full bg-white border border-gray-300 rounded-lg px-3 py-1.5"
-        />
+      <Field
+        label="Valor Arrecadado"
+        name="quantidade"
+        type="number"
+        step="0.01"
+        placeholder="Ex: R$100"
+        value={quantidadeInput}
+        onChange={(e) => handleQuantidadeChange(e.currentTarget.value)}
+      />
 
-        <label className="block mb-1 mt-8">Comprovante (PNG/JPEG/PDF)</label>
+      <div className="mt-4 space-y-1.5">
+        <span className="block text-sm font-medium">
+          Comprovante (PNG/JPEG/PDF)
+        </span>
         <input
-          ref={fileInputRef}
+          ref={upload.inputRef}
           type="file"
-          accept="image/png,image/jpeg,image/jpg,application/pdf"
-          onChange={handleFileChange}
+          accept={upload.accept}
+          onChange={upload.handleInputChange}
           className="hidden"
           aria-hidden="true"
           tabIndex={-1}
         />
 
-        <div className="flex items-center">
-          <button
+        <div className="flex items-center gap-3">
+          <Button
             type="button"
-            onClick={handlePickClick}
-            onMouseDown={(e) => e.currentTarget.classList.add("animate-pop")}
-            onAnimationEnd={(e) =>
-              e.currentTarget.classList.remove("animate-pop")
-            }
-            className="inline-flex items-center justify-center h-14 w-18 rounded-lg bg-white transition"
-            disabled={loading}
+            variant="outline"
+            onClick={upload.pick}
+            className={`h-14 w-16 ${upload.pressed ? "animate-selected-pop" : ""}`}
             aria-label="Selecionar comprovante"
           >
-            <Image
-              src={picking ? (uploadGif as Img) : (uploadStatic as Img)}
-              alt="Selecionar comprovante"
-              width={35}
-              height={35}
-              className="pointer-events-none select-none"
-              draggable={false}
-              priority
-            />
-          </button>
+            {/* One icon system: lucide strokes, like the nav and every other
+                control. The previous raster GIF read as a different language. */}
+            <Paperclip className="size-5" strokeWidth={1.75} aria-hidden />
+          </Button>
 
-          <span className="ml-3 text-sm text-gray-700">
+          {upload.previewUrl && (
+            <img
+              src={upload.previewUrl}
+              alt="Pré-visualização do comprovante"
+              className="h-14 w-14 rounded-md border border-border object-cover"
+            />
+          )}
+
+          <span className="text-sm text-muted-foreground">
             {comprovante
               ? `Selecionado: ${comprovante.name}`
               : "Nenhum arquivo escolhido"}
           </span>
         </div>
+
+        {upload.error && (
+          <p role="alert" className="text-sm font-medium text-destructive">
+            {upload.error}
+          </p>
+        )}
       </div>
     </div>
   );

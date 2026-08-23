@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { Bar, BarChart, XAxis } from "recharts";
-import { Contribution } from "@/components/administrator/contributions-table/columns";
+import { Contribution } from "@/lib/normalize-contributions";
 import {
   Card,
   CardContent,

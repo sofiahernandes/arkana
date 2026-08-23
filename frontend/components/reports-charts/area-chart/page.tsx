@@ -18,7 +18,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Contribution } from "@/components/administrator/contributions-table/columns";
+import { Contribution } from "@/lib/normalize-contributions";
 import { v4 as uuidv4 } from "uuid";
 import { getMockContributions, isMockMode } from "@/lib/mock-db";
 
