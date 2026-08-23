@@ -2,7 +2,9 @@
 "use client";
 
 import React from "react";
+import { Trash2 } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -33,6 +35,7 @@ export default function DeleteContribution({
 
   // Executes the delete request only after confirmation and reports any backend failure inside the dialog itself.
   async function handleConfirm(e: React.MouseEvent<HTMLButtonElement>) {
+    // Keep the dialog open so a failure is readable instead of vanishing.
     e.preventDefault();
 
     try {
@@ -45,55 +48,44 @@ export default function DeleteContribution({
       );
 
       if (!res.ok) {
-        let msg = `Erro ao deletar contribuição! (status ${res.status})`;
-        try {
-          const data = await res.json();
-          if (data?.message) msg = data.message;
-        } catch {}
-        throw new Error(msg);
+        // A non-JSON body is expected for 5xx/HTML error pages — fall back to
+        // the status instead of swallowing the failure.
+        const body = await res.json().catch(() => null);
+        throw new Error(
+          body?.message ??
+            body?.error ??
+            `O servidor não conseguiu excluir a contribuição (status ${res.status}). Ela continua no histórico — tente novamente.`,
+        );
       }
 
       setOpen(false);
       onDeleted?.();
-    } catch (e: any) {
-      setError(e?.message ?? "Erro desconhecido ao deletar");
-      console.error(e);
+    } catch (err) {
+      console.error("Erro ao deletar contribuição:", err);
+      setError(
+        err instanceof TypeError && err.message === "Failed to fetch"
+          ? "Não foi possível falar com o servidor. Verifique sua conexão — nada foi excluído."
+          : err instanceof Error
+            ? err.message
+            : "Não foi possível excluir a contribuição. Tente novamente em instantes.",
+      );
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="flex justify-end mt-6">
+    <div className="mt-6 flex justify-end">
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogTrigger asChild>
-          <button
+          <Button
             type="button"
-            className={`inline-flex items-center gap-2 rounded-lg px-4 py-2
-                    ${
-                      loading
-                        ? "bg-[#b41333]/60 cursor-not-allowed"
-                        : "bg-[#b41333] hover:bg-[#d54646]"
-                    }
-                    text-white font-medium transition-colors duration-200 cursor-pointer
-                    shadow-[0_6px_20px_rgba(247,201,212,0.5)] hover:shadow-[0_10px_28px_rgba(247,201,212,0.6)]`}
+            variant="destructive"
+            className="shadow-md hover:shadow-lg"
           >
-            <svg
-              className="w-5 h-5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M3 6h18" />
-              <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-              <path d="M10 11v6M14 11v6" />
-            </svg>
+            <Trash2 aria-hidden />
             Deletar contribuição
-          </button>
+          </Button>
         </AlertDialogTrigger>
 
         <AlertDialogContent>
@@ -105,17 +97,24 @@ export default function DeleteContribution({
             </AlertDialogDescription>
           </AlertDialogHeader>
 
-          {error && <p className="ml-3 text-sm text-red-600"> {error} </p>}
+          {error && (
+            <p role="alert" className="text-sm font-medium text-destructive">
+              {error}
+            </p>
+          )}
 
           <AlertDialogFooter>
+            {/* Cancel is the calm option; only the confirm carries the red fill. */}
             <AlertDialogCancel disabled={loading}>Cancelar</AlertDialogCancel>
 
-            <AlertDialogAction
-              onClick={handleConfirm}
-              disabled={loading}
-              className="bg-[#b41333] text-white hover:bg-[#d54646] focus:ring-0 cursor-pointer"
-            >
-              {loading ? "Excluindo..." : "Deletar"}
+            <AlertDialogAction asChild>
+              <Button
+                variant="destructive"
+                onClick={handleConfirm}
+                loading={loading}
+              >
+                {loading ? "Excluindo…" : "Deletar"}
+              </Button>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
