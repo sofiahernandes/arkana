@@ -1,5 +1,13 @@
 // Login form fields for participant access. Keeps validation and input wiring grouped together.
+"use client";
+
 import React from "react";
+import { Eye, EyeOff } from "lucide-react";
+
+import Field from "@/components/forms/field";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 type Props = {
   RaUsuario: string;
@@ -17,33 +25,45 @@ const CustomInputs: React.FC<Props> = ({
   const [mostrarSenha, setMostrarSenha] = React.useState(false);
 
   return (
-    <div>
-      <div className="flex flex-col gap-3 items-center">
-        <input
-          type="text"
-          placeholder="Usuário"
-          value={RaUsuario}
-          className="w-[80%] bg-[white] border border-gray-300 rounded-lg text-black placeholder-gray-700 px-3 py-1.5 text-base focus:outline-none"
-          onChange={(e) => setRaUsuario(e.target.value)}
-        />
+    <div className="flex flex-col gap-4">
+      <Field
+        label="R.A do aluno-mentor"
+        name="RaUsuario"
+        type="text"
+        inputMode="numeric"
+        autoComplete="username"
+        placeholder="Insira seu R.A"
+        value={RaUsuario}
+        onChange={(e) => setRaUsuario(e.target.value)}
+        required
+      />
 
-        <input
-          type={mostrarSenha ? "text" : "password"}
-          value={SenhaUsuario}
-          onChange={(e) => setSenhaUsuario(e.target.value)}
-          className="w-[80%] bg-[white] border border-gray-300 rounded-lg text-black placeholder-gray-700 px-3 py-1.5 text-base focus:outline-none"
-          placeholder="Senha"
-        />
-        <button
-          onClick={() => setMostrarSenha(!mostrarSenha)}
-          className="hidden rounded-lg"
-        >
-          {mostrarSenha ? (
-            <img src="../assets/EyeClosed.png" />
-          ) : (
-            <img src="../assets/EyeOpen.png" />
-          )}
-        </button>
+      <div className="space-y-1.5">
+        <Label htmlFor="field-SenhaUsuario">Senha</Label>
+        <div className="flex gap-2">
+          <Input
+            id="field-SenhaUsuario"
+            name="SenhaUsuario"
+            type={mostrarSenha ? "text" : "password"}
+            autoComplete="current-password"
+            placeholder="Insira a senha"
+            value={SenhaUsuario}
+            onChange={(e) => setSenhaUsuario(e.target.value)}
+            required
+          />
+          {/* Was a `hidden` button pointing at a broken relative image path, so
+              there was no way to check a mistyped password. */}
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => setMostrarSenha((visivel) => !visivel)}
+            aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+            aria-pressed={mostrarSenha}
+          >
+            {mostrarSenha ? <EyeOff aria-hidden /> : <Eye aria-hidden />}
+          </Button>
+        </div>
       </div>
     </div>
   );

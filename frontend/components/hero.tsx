@@ -1,34 +1,43 @@
 // Landing hero section shown on the public entry pages to frame the campaign purpose.
 import Image from "next/image";
-import React from "react";
-
 import Link from "next/link";
+import React from "react";
+import { ChevronDown } from "lucide-react";
+
 import heroBackground from "@/assets/texture.png";
 
 const Hero = () => {
   return (
-    <section className="relative h-[600px] z-auto overflow-x-clip w-screen bg-primary">
-      <div className="relative pt-10 z-300 bg-transparent h-full mx-auto flex flex-col justify-between items-center">
-        <div className="pointer-events-none select-none h-full flex flex-col justify-center gap-2 items-center">
-          <h1 className="changa-one-bold text-responsive text-4xl md:text-7xl text-white max-w-4xl text-center mx-auto">
-            LIDERANÇAS
-            <br />
-            EMPÁTICAS
-          </h1>
-          <p className="changa-one-regular text-xl md:text-2xl mt-0 text-white">
-            + ARKANA
-          </p>
-        </div>
-        <Link href="#public-graph">
-          <p className="text-3xl z-300 text-white pb-4 md:pb-10 animate-bounce">
-            ↓
-          </p>
-        </Link>
+    <section className="relative isolate flex h-[min(85dvh,40rem)] flex-col items-center justify-between overflow-hidden bg-primary pt-10">
+      {/* Texture sits behind everything; -z-10 keeps it out of the stacking soup
+          the old z-300/z-auto pairing created. */}
+      <Image
+        src={heroBackground}
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="-z-10 object-cover opacity-50"
+      />
+
+      <div className="pointer-events-none flex h-full select-none flex-col items-center justify-center gap-2 px-6 text-center">
+        <h1 className="font-display text-4xl leading-[1.05] text-primary-foreground md:text-7xl">
+          LIDERANÇAS
+          <br />
+          EMPÁTICAS
+        </h1>
+        <p className="font-display text-xl text-primary-foreground/90 md:text-2xl">
+          + ARKANA
+        </p>
       </div>
 
-      <div className="absolute w-full h-full top-0 right-0 opacity-50">
-        <Image src={heroBackground} alt="Background Hero" fill />
-      </div>
+      <Link
+        href="#public-graph"
+        aria-label="Ir para os resultados da campanha"
+        className="mb-4 rounded-full p-2 text-primary-foreground transition-opacity duration-[--duration-base] ease-[--ease-out] hover:opacity-80 md:mb-10"
+      >
+        <ChevronDown className="animate-nudge size-7" aria-hidden />
+      </Link>
     </section>
   );
 };
